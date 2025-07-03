@@ -1,10 +1,8 @@
 
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAddProject } from '@/app/admin/dashboard/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,34 +11,27 @@ import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { addProject } from '@/lib/project-service';
+import { z } from 'zod';
 
-const initialState = {
-  message: '',
-};
+const projectSchema = z.object({
+  title: z.string().min(1, "Title is required."),
+  category: z.string().min(1, "Category is required."),
+  skills: z.string().min(1, "Please list at least one skill."),
+  mediaUrl: z.string().url("Please enter a valid media URL."),
+  mediaHint: z.string().optional(),
+  description: z.string().min(10, "Description is required."),
+  goal: z.string().min(10, "Goal is required."),
+  process: z.string().min(10, "Process is required."),
+  outcome: z.string().min(10, "Outcome is required."),
+});
 
-function SubmitButton({ isValid }: { isValid: boolean }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full" disabled={pending || !isValid}>
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Adding...
-        </>
-      ) : (
-        <>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Project
-        </>
-      )}
-    </Button>
-  );
-}
 
 export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
-  const [state, formAction] = useActionState(onAddProject, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -59,19 +50,10 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
   const isImageUrl = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(previewUrl);
 
   useEffect(() => {
-    const { title, category, skills, mediaUrl, description, goal, process, outcome } = formData;
-    const isValid = 
-      title.trim() !== '' &&
-      category.trim() !== '' &&
-      skills.trim() !== '' &&
-      mediaUrl.trim() !== '' &&
-      description.trim() !== '' &&
-      goal.trim() !== '' &&
-      process.trim() !== '' &&
-      outcome.trim() !== '';
-    setIsFormValid(isValid);
+    const result = projectSchema.safeParse(formData);
+    setIsFormValid(result.success);
   }, [formData]);
-  
+
   const resetForm = () => {
     const initialFormData = {
       title: '', category: '', skills: '',
@@ -83,23 +65,6 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     formRef.current?.reset();
   };
 
-  useEffect(() => {
-    if (state.message === 'success') {
-      toast({
-        title: 'Project Added',
-        description: 'The new project has been added successfully.',
-      });
-      resetForm();
-      setDialogOpen(false);
-      router.refresh();
-    } else if (state.message && state.message !== 'success') {
-      toast({
-        title: 'Error Adding Project',
-        description: state.message,
-        variant: 'destructive',
-      });
-    }
-  }, [state, toast, setDialogOpen, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -109,13 +74,65 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const result = projectSchema.safeParse(formData);
+    if (!result.success) {
+      toast({
+        title: 'Invalid Form Data',
+        description: 'Please fill out all required fields correctly.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const { title, category, skills, mediaUrl, mediaHint, description, goal, process, outcome } = result.data;
+  
+    const newProjectData = {
+      title,
+      category,
+      description,
+      skills: skills.split(",").map(s => s.trim()),
+      mediaUrl,
+      mediaHint: mediaHint || 'new project',
+      details: {
+        goal,
+        process,
+        outcome,
+      }
+    };
+  
+    try {
+      await addProject(newProjectData);
+      toast({
+        title: 'Project Added',
+        description: 'The new project has been added successfully.',
+      });
+      resetForm();
+      setDialogOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to add project:", error);
+      toast({
+        title: 'Error Adding Project',
+        description: 'Failed to add project to the database. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <Card className="border-0 shadow-none">
     <CardHeader>
         <CardTitle>Add New Project</CardTitle>
         <CardDescription>Fill in the details for your new portfolio piece. Fields marked with * are required.</CardDescription>
     </CardHeader>
-    <form ref={formRef} action={formAction}>
+    <form ref={formRef} onSubmit={handleSubmit}>
         <CardContent>
             <ScrollArea className="h-96 pr-6">
                 <div className="space-y-4">
@@ -133,7 +150,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mediaUrl">Media URL (Image or .mp4) *</Label>
-                    <Input id="mediaUrl" name="mediaUrl" value={formData.mediaUrl} onChange={handleChange} required />
+                    <Input id="mediaUrl" name="mediaUrl" type="url" value={formData.mediaUrl} onChange={handleChange} required />
                     {isImageUrl && (
                         <div className="mt-2 rounded-md border p-2 bg-muted/50">
                             <p className="text-sm text-muted-foreground mb-2">Image Preview:</p>
@@ -166,7 +183,18 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
             </ScrollArea>
         </CardContent>
         <CardFooter className="pt-6">
-            <SubmitButton isValid={isFormValid} />
+            <Button type="submit" className="w-full" disabled={isLoading || !isFormValid}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Project
+                </>
+              )}
+            </Button>
         </CardFooter>
     </form>
     </Card>

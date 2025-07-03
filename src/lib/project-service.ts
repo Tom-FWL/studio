@@ -1,6 +1,5 @@
-'use server';
 
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from './types';
 
@@ -18,7 +17,7 @@ function slugify(text: string) {
 const getMediaType = (url: string) => (url.endsWith('.mp4') ? 'video' : 'image');
 
 // Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType'>): Promise<Project> {
+export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt'>): Promise<Project> {
   let slug = slugify(projectData.title);
   
   // Ensure slug is unique
@@ -32,7 +31,7 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'med
     ...projectData,
     slug,
     mediaType: getMediaType(projectData.mediaUrl),
-    createdAt: new Date(),
+    createdAt: serverTimestamp(),
   };
 
   const docRef = await addDoc(collection(db, 'projects'), newProjectData);
@@ -77,7 +76,7 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 }
 
 // Update an existing project in Firestore
-export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType'>): Promise<void> {
+export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt'>): Promise<void> {
   const projectDoc = doc(db, 'projects', id);
   await updateDoc(projectDoc, {
     ...projectData,
@@ -95,6 +94,6 @@ export async function deleteProject(id: string): Promise<void> {
 export async function addContactMessage(data: { email: string; name: string; message: string; }) {
     await addDoc(collection(db, "contacts"), {
         ...data,
-        submittedAt: new Date(),
+        submittedAt: serverTimestamp(),
     });
 }

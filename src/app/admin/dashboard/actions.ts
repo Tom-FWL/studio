@@ -1,65 +1,12 @@
+
 "use server";
 
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { addProject, deleteProject as deleteProjectFromDb } from '@/lib/project-service';
+import { deleteProject as deleteProjectFromDb } from '@/lib/project-service';
 
-
-const formSchema = z.object({
-  title: z.string().min(2, "Title is required."),
-  category: z.string().min(2, "Category is required."),
-  skills: z.string().min(2, "Please list at least one skill."),
-  mediaUrl: z.string().url("Please enter a valid media URL."),
-  mediaHint: z.string().optional(),
-  description: z.string().min(10, "Description is required."),
-  goal: z.string().min(10, "Goal is required."),
-  process: z.string().min(10, "Process is required."),
-  outcome: z.string().min(10, "Outcome is required."),
-});
-
-type FormState = {
-  message: string;
-  errors?: Record<string, string[] | undefined>;
-};
-
-export async function onAddProject(prevState: FormState, data: FormData): Promise<FormState> {
-  const formData = Object.fromEntries(data);
-  const parsed = formSchema.safeParse(formData);
-
-  if (!parsed.success) {
-    const errorMessages = parsed.error.issues.map(i => i.message).join(', ');
-    return {
-      message: `Invalid form data: ${errorMessages}`,
-      errors: parsed.error.flatten().fieldErrors,
-    };
-  }
-  
-  const { title, category, skills, mediaUrl, mediaHint, description, goal, process, outcome } = parsed.data;
-
-  const newProjectData = {
-    title,
-    category,
-    description,
-    skills: skills.split(",").map(s => s.trim()),
-    mediaUrl,
-    mediaHint: mediaHint || 'new project',
-    details: {
-      goal,
-      process,
-      outcome,
-    }
-  };
-
-  try {
-    await addProject(newProjectData);
-    revalidatePath('/');
-    revalidatePath('/admin/dashboard');
-    return { message: "success" };
-  } catch (error) {
-    console.error("Failed to add project:", error);
-    return { message: "Failed to add project to the database." };
-  }
-}
+// The 'onAddProject' server action has been removed and replaced with a client-side
+// handler in 'add-project-form.tsx' to correctly handle Firebase authentication.
+// This prevents the "PERMISSION_DENIED" error from Firestore.
 
 export async function deleteProject(id: string): Promise<{ message: string }> {
   try {
@@ -68,6 +15,7 @@ export async function deleteProject(id: string): Promise<{ message: string }> {
     revalidatePath('/admin/dashboard');
     return { message: 'success' };
   } catch (error) {
+    console.error("Failed to delete project:", error);
     return { message: 'Failed to delete project.' };
   }
 }
