@@ -1,10 +1,11 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight, Mail, Heart } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,10 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { likeProject } from '@/lib/project-service';
+import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type ProjectCardProps = {
   project: Project;
@@ -21,6 +26,71 @@ type ProjectCardProps = {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const isVideo = project.mediaType === 'video';
+  const { toast } = useToast();
+
+  const [likes, setLikes] = useState(project.likes || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isProcessingLike, setIsProcessingLike] = useState(false);
+
+  useEffect(() => {
+    try {
+      const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
+      if (likedProjects.includes(project.id)) {
+        setIsLiked(true);
+      }
+    } catch (error) {
+      console.error("Could not parse liked projects from localStorage", error);
+      localStorage.setItem('likedProjects', '[]');
+    }
+  }, [project.id]);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation(); 
+    if (isLiked || isProcessingLike) return;
+
+    setIsProcessingLike(true);
+    
+    try {
+      await likeProject(project.id);
+      
+      const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
+      localStorage.setItem('likedProjects', JSON.stringify([...likedProjects, project.id]));
+      
+      setLikes(prevLikes => prevLikes + 1);
+      setIsLiked(true);
+      
+      toast({
+        title: "Thanks for liking!",
+        description: `You've shown your appreciation for "${project.title}".`,
+      });
+    } catch (error) {
+      console.error("Failed to like project:", error);
+      toast({
+        title: "Error",
+        description: "Could not register your like. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingLike(false);
+    }
+  };
+
+  const likeButton = (
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={handleLike}
+      disabled={isLiked || isProcessingLike}
+      className={cn(
+        "flex items-center gap-1.5 text-sm text-muted-foreground transition-colors",
+        !isLiked && "hover:text-primary",
+        isLiked && "cursor-default text-red-500"
+      )}
+      aria-label="Like project"
+    >
+      <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
+      <span>{likes}</span>
+    </motion.button>
+  );
 
   return (
     <Dialog>
@@ -57,10 +127,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {project.category}
             </Badge>
             <CardTitle className="mb-2 font-headline text-xl">{project.title}</CardTitle>
-            <p className="mb-4 text-sm text-muted-foreground">{project.description}</p>
-            <div className="flex items-center text-sm font-semibold text-primary">
-              View Details
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            <p className="mb-4 text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+            <div className="flex items-center justify-between text-sm font-semibold">
+              <div className="flex items-center text-primary">
+                View Details
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+              {likeButton}
             </div>
           </CardContent>
         </Card>
@@ -97,6 +170,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 {project.category}
               </Badge>
               <DialogTitle className="text-4xl md:text-5xl">{project.title}</DialogTitle>
+               <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
+                <Heart className="h-4 w-4 text-red-500 fill-current" />
+                <span>{likes} Likes</span>
+              </div>
             </DialogHeader>
 
             <div className="max-w-3xl mx-auto">

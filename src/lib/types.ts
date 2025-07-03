@@ -15,4 +15,5 @@ export type Project = {
     outcome: string;
   };
   createdAt?: string | null;
+  likes?: number;
 };

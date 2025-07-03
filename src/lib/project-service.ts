@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp, Timestamp, increment } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from './types';
 
@@ -23,12 +23,13 @@ function toSerializableProject(doc: any): Project {
         id: doc.id,
         ...data,
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : null,
+        likes: data.likes || 0,
     } as Project;
 }
 
 
 // Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt' | 'audioUrl'>): Promise<Project> {
+export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt' | 'audioUrl' | 'likes'>): Promise<Project> {
   let slug = slugify(projectData.title);
   
   // Ensure slug is unique
@@ -43,6 +44,7 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'med
     slug,
     mediaType: getMediaType(projectData.mediaUrl),
     createdAt: serverTimestamp(),
+    likes: 0,
   };
 
   const docRef = await addDoc(collection(db, 'projects'), newProjectData);
@@ -84,11 +86,19 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 }
 
 // Update an existing project in Firestore
-export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt' | 'audioUrl'>): Promise<void> {
+export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt' | 'audioUrl' | 'likes'>): Promise<void> {
   const projectDoc = doc(db, 'projects', id);
   await updateDoc(projectDoc, {
     ...projectData,
     mediaType: getMediaType(projectData.mediaUrl),
+  });
+}
+
+// Increment likes for a project
+export async function likeProject(id: string): Promise<void> {
+  const projectDoc = doc(db, 'projects', id);
+  await updateDoc(projectDoc, {
+    likes: increment(1),
   });
 }
 
