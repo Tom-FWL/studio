@@ -4,39 +4,48 @@
 import Image from "next/image";
 import { Award, Lightbulb, Heart } from "lucide-react";
 import { motion } from 'framer-motion';
+import { AnimatedText } from "@/components/animated-text";
 
 export default function AboutPage() {
+  const story1 = "From a young age, I've been captivated by the intersection of art and technology. This passion has guided my journey, leading me to explore various facets of digital creation—from intricate branding projects to immersive web experiences. I believe that great design is not just about aesthetics, but about telling a story and creating a meaningful connection with the audience.";
+  const story2 = "My work is driven by a minimalist philosophy, where clarity and purpose are paramount. I strive to create designs that are not only beautiful but also intuitive and effective. Every line, color, and interaction is carefully considered to contribute to a cohesive and engaging user experience.";
 
   const introContainer = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.2, delayChildren: 0.1 },
     },
   };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  const sectionContainer = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-  
-  const itemFadeIn = {
+  const headingFadeIn = {
     hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
+  const valuesContainer = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.25, // 250ms stagger
+      },
+    },
+  };
+
+  const valueItem = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: "easeOut" } }
+  };
+  
   const valueCardHover = {
     scale: 1.05,
-    transition: { type: "spring", stiffness: 400, damping: 15 }
+    boxShadow: "0px 10px 30px -5px hsl(var(--primary) / 0.1)",
+    transition: { type: "spring", stiffness: 300, damping: 15 }
   };
 
   return (
@@ -75,45 +84,39 @@ export default function AboutPage() {
         </motion.div>
 
         <div className="md:col-span-2">
-          <motion.div
-            variants={sectionContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
+          <div>
             <motion.h2 
               className="text-3xl md:text-4xl font-headline text-foreground mb-6 border-l-4 border-primary pl-4"
-              variants={itemFadeIn}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.5 }}
+              variants={headingFadeIn}
             >
               My Story
             </motion.h2>
             <div className="space-y-6 text-lg text-foreground/80 font-body">
-              <motion.p variants={itemFadeIn}>
-                From a young age, I've been captivated by the intersection of art and technology. This passion has guided my journey, leading me to explore various facets of digital creation—from intricate branding projects to immersive web experiences. I believe that great design is not just about aesthetics, but about telling a story and creating a meaningful connection with the audience.
-              </motion.p>
-              <motion.p variants={itemFadeIn}>
-                My work is driven by a minimalist philosophy, where clarity and purpose are paramount. I strive to create designs that are not only beautiful but also intuitive and effective. Every line, color, and interaction is carefully considered to contribute to a cohesive and engaging user experience.
-              </motion.p>
+               <AnimatedText text={story1} staggerDelay={0.06} className="text-lg text-foreground/80 font-body" />
+               <AnimatedText text={story2} staggerDelay={0.06} className="text-lg text-foreground/80 font-body" />
             </div>
-          </motion.div>
+          </div>
 
           <motion.div 
             className="mt-12"
-            variants={sectionContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
+            variants={valuesContainer}
           >
             <motion.h3 
               className="text-2xl md:text-3xl font-headline text-foreground mb-6 border-l-4 border-primary pl-4"
-              variants={itemFadeIn}
+              variants={headingFadeIn}
             >
               My Values
             </motion.h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               <motion.div 
-                className="flex flex-col items-center text-center p-4 rounded-lg"
-                variants={itemFadeIn}
+                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                variants={valueItem}
                 whileHover={valueCardHover}
               >
                 <Lightbulb className="w-12 h-12 text-primary mb-4" />
@@ -123,8 +126,8 @@ export default function AboutPage() {
                 </p>
               </motion.div>
               <motion.div 
-                className="flex flex-col items-center text-center p-4 rounded-lg"
-                variants={itemFadeIn}
+                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                variants={valueItem}
                 whileHover={valueCardHover}
               >
                 <Heart className="w-12 h-12 text-primary mb-4" />
@@ -134,8 +137,8 @@ export default function AboutPage() {
                 </p>
               </motion.div>
               <motion.div 
-                className="flex flex-col items-center text-center p-4 rounded-lg"
-                variants={itemFadeIn}
+                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                variants={valueItem}
                 whileHover={valueCardHover}
               >
                 <Award className="w-12 h-12 text-primary mb-4" />
