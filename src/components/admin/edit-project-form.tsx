@@ -39,12 +39,8 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (state.message === 'success') {
-      toast({
-        title: 'Project Updated',
-        description: 'Your changes have been saved (this is a prototype, data is not persisted).',
-      });
-    } else if (state.message && state.message !== 'success') {
+    // The server action now redirects on success, so we only need to handle error messages.
+    if (state.message) {
       toast({
         title: 'Error',
         description: state.message,
@@ -74,8 +70,8 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
             <Input id="skills" name="skills" defaultValue={project.skills.join(', ')} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input id="imageUrl" name="imageUrl" defaultValue={project.imageUrl} required />
+            <Label htmlFor="mediaUrl">Media URL (Image or .mp4 Video)</Label>
+            <Input id="mediaUrl" name="mediaUrl" defaultValue={project.mediaUrl} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
@@ -87,7 +83,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
               required
             />
           </div>
-           {state.message && state.message !== 'success' && (
+           {state.message && (
               <div className="text-destructive text-sm">
                 <p>{state.message}</p>
               </div>

@@ -21,6 +21,7 @@ export async function generateStaticParams() {
 
 export default function ProjectPage({ params }: ProjectPageProps) {
   const project: Project | undefined = projects.find((p) => p.slug === params.slug);
+  const isVideo = project?.mediaType === 'video';
 
   if (!project) {
     notFound();
@@ -42,15 +43,28 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         <h1 className="text-4xl md:text-6xl font-headline text-foreground">{project.title}</h1>
       </header>
 
-      <div className="mb-12 rounded-lg overflow-hidden shadow-xl">
-        <Image
-          src={project.imageUrl}
-          alt={`Showcase image for ${project.title}`}
-          width={1200}
-          height={675}
-          className="w-full object-cover"
-          data-ai-hint={project.imageHint}
-        />
+      <div className="mb-12 rounded-lg overflow-hidden shadow-xl bg-black">
+        {isVideo ? (
+          <video
+            src={project.mediaUrl}
+            width={1200}
+            height={675}
+            className="w-full object-cover"
+            autoPlay
+            loop
+            controls
+            muted
+          />
+        ) : (
+          <Image
+            src={project.mediaUrl}
+            alt={`Showcase image for ${project.title}`}
+            width={1200}
+            height={675}
+            className="w-full object-cover"
+            data-ai-hint={project.mediaHint}
+          />
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto">

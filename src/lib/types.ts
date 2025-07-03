@@ -3,8 +3,9 @@ export type Project = {
   title: string;
   category: string;
   description: string;
-  imageUrl: string;
-  imageHint: string;
+  mediaUrl: string;
+  mediaHint: string;
+  mediaType: 'image' | 'video';
   audioUrl?: string;
   skills: string[];
   details: {

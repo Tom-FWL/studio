@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Video } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +44,7 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80px]">Image</TableHead>
+            <TableHead className="w-[80px]">Media</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Skills</TableHead>
@@ -55,14 +55,20 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
           {projects.map((project) => (
             <TableRow key={project.slug}>
               <TableCell>
-                <Image
-                  src={project.imageUrl}
-                  alt={project.title}
-                  width={64}
-                  height={48}
-                  className="rounded-md object-cover"
-                  data-ai-hint={project.imageHint}
-                />
+                {project.mediaType === 'video' ? (
+                  <div className="flex h-12 w-16 items-center justify-center rounded-md bg-muted">
+                    <Video className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <Image
+                    src={project.mediaUrl}
+                    alt={project.title}
+                    width={64}
+                    height={48}
+                    className="rounded-md object-cover w-16 h-12"
+                    data-ai-hint={project.mediaHint}
+                  />
+                )}
               </TableCell>
               <TableCell className="font-medium">{project.title}</TableCell>
               <TableCell>

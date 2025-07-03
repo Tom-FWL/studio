@@ -20,20 +20,36 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const isVideo = project.mediaType === 'video';
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Card className="group h-full cursor-pointer overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
           <CardHeader className="p-0">
-            <div className="aspect-video overflow-hidden">
-              <Image
-                src={project.imageUrl}
-                alt={project.title}
-                width={600}
-                height={400}
-                data-ai-hint={project.imageHint}
-                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
+            <div className="aspect-video overflow-hidden bg-black">
+              {isVideo ? (
+                <video
+                  key={project.mediaUrl}
+                  src={project.mediaUrl}
+                  width={600}
+                  height={400}
+                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <Image
+                  src={project.mediaUrl}
+                  alt={project.title}
+                  width={600}
+                  height={400}
+                  data-ai-hint={project.mediaHint}
+                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-6">
@@ -52,15 +68,28 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <DialogContent className="max-w-4xl p-0">
         <ScrollArea className="max-h-[90vh]">
           <div className="p-6 md:p-8">
-            <div className="mb-8 rounded-lg overflow-hidden shadow-xl">
-              <Image
-                src={project.imageUrl}
-                alt={`Showcase image for ${project.title}`}
-                width={1200}
-                height={675}
-                className="w-full object-cover"
-                data-ai-hint={project.imageHint}
-              />
+            <div className="mb-8 rounded-lg overflow-hidden shadow-xl bg-black">
+              {isVideo ? (
+                 <video
+                  src={project.mediaUrl}
+                  width={1200}
+                  height={675}
+                  className="w-full object-cover"
+                  autoPlay
+                  loop
+                  controls
+                  muted
+                />
+              ) : (
+                <Image
+                  src={project.mediaUrl}
+                  alt={`Showcase image for ${project.title}`}
+                  width={1200}
+                  height={675}
+                  className="w-full object-cover"
+                  data-ai-hint={project.mediaHint}
+                />
+              )}
             </div>
 
             <DialogHeader className="mb-8 text-center">
