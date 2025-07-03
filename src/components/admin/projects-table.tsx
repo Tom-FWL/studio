@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 type ProjectsTableProps = {
   projects: Project[];
@@ -76,9 +77,11 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="icon" onClick={handleNotImplemented}>
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link href={`/admin/projects/${project.slug}/edit`}>
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Edit</span>
+                  </Link>
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
