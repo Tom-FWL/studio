@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { updateProject } from '@/lib/project-service';
+import { updateProject as updateProjectInDb } from '@/lib/project-service';
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is missing."),
@@ -22,6 +22,9 @@ type FormState = {
   message: string;
 };
 
+// This server action is no longer used by the EditProjectForm, which now handles updates
+// on the client-side to ensure Firebase authentication context is available.
+// This prevents "PERMISSION_DENIED" errors from Firestore.
 export async function onEditProject(prevState: FormState, data: FormData): Promise<FormState> {
   const formData = Object.fromEntries(data);
   const parsed = formSchema.safeParse(formData);
@@ -49,7 +52,7 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
   };
 
   try {
-    await updateProject(id, projectUpdateData);
+    await updateProjectInDb(id, projectUpdateData);
 
     revalidatePath('/');
     revalidatePath('/admin/dashboard');

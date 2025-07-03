@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { deleteProject } from "@/app/admin/dashboard/actions";
+import { deleteProject } from "@/lib/project-service";
 import { useRouter } from "next/navigation";
 
 type ProjectsTableProps = {
@@ -38,18 +38,18 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
   const router = useRouter();
 
   const handleDeleteProject = async (id: string, title: string) => {
-    const result = await deleteProject(id);
-
-    if (result.message === "success") {
+    try {
+      await deleteProject(id);
       toast({
         title: "Project Deleted",
         description: `"${title}" has been permanently removed.`,
       });
-      router.refresh(); // Refresh the dashboard to show the updated list
-    } else {
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to delete project:", error);
       toast({
-        title: "Error",
-        description: result.message,
+        title: "Error Deleting Project",
+        description: "Failed to delete project. Please try again.",
         variant: "destructive",
       });
     }

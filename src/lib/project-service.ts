@@ -28,7 +28,7 @@ function toSerializableProject(doc: any): Project {
 
 
 // Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt'>): Promise<Project> {
+export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt' | 'audioUrl'>): Promise<Project> {
   let slug = slugify(projectData.title);
   
   // Ensure slug is unique
@@ -69,8 +69,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | undefine
   if (querySnapshot.empty) {
     return undefined;
   }
-  const doc = querySnapshot.docs[0];
-  return toSerializableProject(doc);
+  const docRef = querySnapshot.docs[0];
+  return toSerializableProject(docRef);
 }
 
 // Fetch a single project by its ID
@@ -84,7 +84,7 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 }
 
 // Update an existing project in Firestore
-export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt'>): Promise<void> {
+export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt' | 'audioUrl'>): Promise<void> {
   const projectDoc = doc(db, 'projects', id);
   await updateDoc(projectDoc, {
     ...projectData,

@@ -8,6 +8,11 @@ import { deleteProject as deleteProjectFromDb } from '@/lib/project-service';
 // handler in 'add-project-form.tsx' to correctly handle Firebase authentication.
 // This prevents the "PERMISSION_DENIED" error from Firestore.
 
+// The 'deleteProject' action has also been moved to a client-side handler in 'projects-table.tsx'
+// to resolve the same permission issue. The function below is no longer called by the application
+// but is kept to prevent breaking changes if it were referenced elsewhere. For new functionality,
+// prefer client-side handlers that call the project service directly.
+
 export async function deleteProject(id: string): Promise<{ message: string }> {
   try {
     await deleteProjectFromDb(id);
