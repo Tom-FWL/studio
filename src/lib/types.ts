@@ -1,4 +1,5 @@
 export type Project = {
+  id: string; // Firestore document ID
   slug: string;
   title: string;
   category: string;
@@ -13,4 +14,5 @@ export type Project = {
     process: string;
     outcome: string;
   };
+  createdAt?: any;
 };

@@ -1,16 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { addProject, deleteProject as deleteProjectFromDb } from '@/lib/project-service';
 
-
-export async function logout() {
-  cookies().set("session", "", { expires: new Date(0) });
-  redirect("/admin/login");
-}
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required."),
@@ -57,19 +50,20 @@ export async function onAddProject(prevState: FormState, data: FormData): Promis
     }
   };
 
-  const newProject = await addProject(newProjectData);
-
-  revalidatePath('/');
-  revalidatePath('/admin/dashboard');
-  revalidatePath(`/projects/${newProject.slug}`);
-  revalidatePath(`/admin/projects/${newProject.slug}/edit`);
-
-  return { message: "success" };
+  try {
+    await addProject(newProjectData);
+    revalidatePath('/');
+    revalidatePath('/admin/dashboard');
+    return { message: "success" };
+  } catch (error) {
+    console.error("Failed to add project:", error);
+    return { message: "Failed to add project to the database." };
+  }
 }
 
-export async function deleteProject(slug: string): Promise<{ message: string }> {
+export async function deleteProject(id: string): Promise<{ message: string }> {
   try {
-    await deleteProjectFromDb(slug);
+    await deleteProjectFromDb(id);
     revalidatePath('/');
     revalidatePath('/admin/dashboard');
     return { message: 'success' };

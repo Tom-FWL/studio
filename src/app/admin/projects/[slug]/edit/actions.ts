@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { updateProject } from '@/lib/project-service';
 
 const formSchema = z.object({
+  id: z.string().min(1, "Project ID is missing."),
   slug: z.string(),
   title: z.string().min(2, "Title is required."),
   category: z.string().min(2, "Category is required."),
@@ -31,7 +32,7 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
     };
   }
 
-  const { slug, ...projectData } = parsed.data;
+  const { id, slug, ...projectData } = parsed.data;
 
   const projectUpdateData = {
     title: projectData.title,
@@ -48,7 +49,7 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
   };
 
   try {
-    await updateProject(slug, projectUpdateData);
+    await updateProject(id, projectUpdateData);
 
     revalidatePath('/');
     revalidatePath('/admin/dashboard');
@@ -57,6 +58,7 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
 
     return { message: 'success' };
   } catch (error) {
+    console.error("Failed to update project:", error);
     return { message: 'Failed to update project. Please try again.' };
   }
 }

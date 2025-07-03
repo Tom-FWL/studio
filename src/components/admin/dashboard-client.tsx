@@ -1,24 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Project } from '@/lib/types';
 import { ProjectsTable } from '@/components/admin/projects-table';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Shield, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { logout } from '@/app/admin/dashboard/actions';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddProjectForm } from '@/components/admin/add-project-form';
+import { useAuth } from '@/context/auth-context';
 
 export function DashboardClient({ projects: initialProjects }: { projects: Project[] }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [isAddProjectOpen, setAddProjectOpen] = useState(false);
-
-  // This effect ensures that if the parent component passes new projects (e.g., after a refresh),
-  // the local state is updated.
-  useEffect(() => {
-    setProjects(initialProjects);
-  }, [initialProjects]);
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-muted/20">
@@ -28,7 +22,7 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
             <Shield className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">Admin Panel</span>
           </Link>
-          <Button variant="ghost" onClick={() => logout()}>
+          <Button variant="ghost" onClick={logout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>
@@ -49,8 +43,7 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
             </DialogContent>
           </Dialog>
         </div>
-        {/* The `setProjects` prop is necessary for client-side optimistic updates like delete */}
-        <ProjectsTable projects={projects} setProjects={setProjects} />
+        <ProjectsTable projects={initialProjects} />
       </main>
     </div>
   );

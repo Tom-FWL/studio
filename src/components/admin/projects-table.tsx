@@ -27,26 +27,25 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { deleteProject } from "@/app/admin/dashboard/actions";
+import { useRouter } from "next/navigation";
 
 type ProjectsTableProps = {
   projects: Project[];
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 };
 
-export function ProjectsTable({ projects, setProjects }: ProjectsTableProps) {
+export function ProjectsTable({ projects }: ProjectsTableProps) {
   const { toast } = useToast();
+  const router = useRouter();
 
-  const handleDeleteProject = async (slug: string, title: string) => {
-    const result = await deleteProject(slug);
+  const handleDeleteProject = async (id: string, title: string) => {
+    const result = await deleteProject(id);
 
     if (result.message === "success") {
-      setProjects((currentProjects) =>
-        currentProjects.filter((p) => p.slug !== slug)
-      );
       toast({
         title: "Project Deleted",
         description: `"${title}" has been permanently removed.`,
       });
+      router.refresh(); // Refresh the dashboard to show the updated list
     } else {
       toast({
         title: "Error",
@@ -70,7 +69,7 @@ export function ProjectsTable({ projects, setProjects }: ProjectsTableProps) {
         </TableHeader>
         <TableBody>
           {projects.map((project) => (
-            <TableRow key={project.slug}>
+            <TableRow key={project.id}>
               <TableCell>
                 {project.mediaType === 'video' ? (
                   <div className="flex h-12 w-16 items-center justify-center rounded-md bg-muted">
@@ -124,7 +123,7 @@ export function ProjectsTable({ projects, setProjects }: ProjectsTableProps) {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleDeleteProject(project.slug, project.title)}
+                        onClick={() => handleDeleteProject(project.id, project.title)}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         Delete

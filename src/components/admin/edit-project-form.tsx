@@ -47,7 +47,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         title: 'Project Saved!',
         description: 'Your changes have been successfully saved.',
       });
-      router.refresh();
+      router.refresh(); // Refresh the current page to show changes if any
       router.push('/admin/dashboard');
     } else if (state.message) {
       toast({
@@ -67,6 +67,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         <CardContent>
           <ScrollArea className="h-96 pr-4">
             <div className="space-y-4">
+              <input type="hidden" name="id" value={project.id} />
               <input type="hidden" name="slug" value={project.slug} />
               <div className="space-y-2">
                 <Label htmlFor="title">Project Title</Label>

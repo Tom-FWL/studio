@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContactForm } from "@/components/contact/contact-form";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function ContactPage() {
@@ -12,12 +11,13 @@ export default function ContactPage() {
         </p>
       </header>
 
-      <div className="max-w-lg mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline text-center">Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        <div>
+          <h2 className="text-2xl font-headline mb-4">Send a Message</h2>
+          <ContactForm />
+        </div>
+        <div className="space-y-8">
+            <h2 className="text-2xl font-headline mb-4">Contact Information</h2>
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-accent rounded-full">
                 <Mail className="h-6 w-6 text-accent-foreground" />
@@ -49,17 +49,7 @@ export default function ContactPage() {
                 <p className="text-muted-foreground">Creativity Lane, Design City</p>
               </div>
             </div>
-            
-            <div className="pt-4 text-center">
-              <Button asChild size="lg">
-                <a href="mailto:hello@artfolio.com">
-                  Send a Message
-                  <Mail className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
