@@ -14,5 +14,5 @@ export type Project = {
     process: string;
     outcome: string;
   };
-  createdAt?: any;
+  createdAt?: string | null;
 };

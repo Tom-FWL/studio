@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from './types';
 
@@ -15,6 +15,17 @@ function slugify(text: string) {
 }
 
 const getMediaType = (url: string) => (url.endsWith('.mp4') ? 'video' : 'image');
+
+// Helper to safely convert Firestore data to a serializable Project object
+function toSerializableProject(doc: any): Project {
+    const data = doc.data();
+    return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : null,
+    } as Project;
+}
+
 
 // Create a new project in Firestore
 export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt'>): Promise<Project> {
@@ -39,7 +50,7 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'med
   return {
     ...newProjectData,
     id: docRef.id,
-  };
+  } as Project;
 }
 
 // Fetch all projects from Firestore
@@ -47,10 +58,7 @@ export async function getProjects(): Promise<Project[]> {
   const projectsCol = collection(db, 'projects');
   const q = query(projectsCol, orderBy('createdAt', 'desc'));
   const projectSnapshot = await getDocs(q);
-  const projectList = projectSnapshot.docs.map(doc => ({
-    ...doc.data(),
-    id: doc.id,
-  })) as Project[];
+  const projectList = projectSnapshot.docs.map(toSerializableProject);
   return projectList;
 }
 
@@ -62,7 +70,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | undefine
     return undefined;
   }
   const doc = querySnapshot.docs[0];
-  return { ...doc.data(), id: doc.id } as Project;
+  return toSerializableProject(doc);
 }
 
 // Fetch a single project by its ID
@@ -72,7 +80,7 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
     if (!docSnap.exists()) {
         return undefined;
     }
-    return { ...docSnap.data(), id: docSnap.id } as Project;
+    return toSerializableProject(docSnap);
 }
 
 // Update an existing project in Firestore
