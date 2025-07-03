@@ -1,7 +1,6 @@
 'use server';
 
 import { z } from 'zod';
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { updateProject } from '@/lib/project-service';
 
@@ -55,5 +54,5 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
   revalidatePath(`/projects/${slug}`);
   revalidatePath(`/admin/projects/${slug}/edit`);
 
-  redirect('/admin/dashboard');
+  return { message: 'success' };
 }

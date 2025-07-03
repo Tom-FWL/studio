@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import type { Project } from '@/lib/types';
 import { onEditProject } from '@/app/admin/projects/[slug]/edit/actions';
 import { Button } from '@/components/ui/button';
@@ -38,17 +39,23 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [state, formAction] = useActionState(onEditProject, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
-    // The server action now redirects on success, so we only need to handle error messages.
-    if (state.message && state.message !== 'success') {
+    if (state.message === 'success') {
       toast({
-        title: 'Error',
+        title: 'Project Updated',
+        description: `"${project.title}" has been saved.`,
+      });
+      router.push('/admin/dashboard');
+    } else if (state.message) {
+      toast({
+        title: 'Error Saving Project',
         description: state.message,
         variant: 'destructive',
       });
     }
-  }, [state, toast]);
+  }, [state, toast, router, project.title]);
 
   return (
     <Card>
