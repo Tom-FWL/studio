@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { updateProject } from '@/lib/project-service';
+import { redirect } from 'next/navigation';
 
 const formSchema = z.object({
   slug: z.string(),
@@ -54,5 +55,5 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
   revalidatePath(`/projects/${slug}`);
   revalidatePath(`/admin/projects/${slug}/edit`);
 
-  return { message: 'success' };
+  redirect('/admin/dashboard');
 }

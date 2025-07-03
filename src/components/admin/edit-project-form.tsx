@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { useRouter } from 'next/navigation';
 import type { Project } from '@/lib/types';
 import { onEditProject } from '@/app/admin/projects/[slug]/edit/actions';
 import { Button } from '@/components/ui/button';
@@ -39,23 +38,16 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [state, formAction] = useActionState(onEditProject, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
-  const router = useRouter();
 
   useEffect(() => {
-    if (state.message === 'success') {
-      toast({
-        title: 'Project Updated',
-        description: `"${project.title}" has been saved.`,
-      });
-      router.push('/admin/dashboard');
-    } else if (state.message) {
+    if (state?.message) {
       toast({
         title: 'Error Saving Project',
         description: state.message,
         variant: 'destructive',
       });
     }
-  }, [state, toast, router, project.title]);
+  }, [state, toast]);
 
   return (
     <Card>
@@ -127,7 +119,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                   required
                 />
               </div>
-              {state.message && state.message !== 'success' && (
+              {state?.message && (
                   <div className="text-destructive text-sm">
                     <p>{state.message}</p>
                   </div>
