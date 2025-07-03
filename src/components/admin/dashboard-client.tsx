@@ -1,19 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import type { Project } from "@/lib/types";
-import { ProjectsTable } from "@/components/admin/projects-table";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Shield, LogOut } from "lucide-react";
-import Link from "next/link";
-import { logout } from "@/app/admin/dashboard/actions";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AddProjectForm } from "@/components/admin/add-project-form";
+import { useState, useEffect } from 'react';
+import type { Project } from '@/lib/types';
+import { ProjectsTable } from '@/components/admin/projects-table';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Shield, LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { logout } from '@/app/admin/dashboard/actions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AddProjectForm } from '@/components/admin/add-project-form';
 
 
 export function DashboardClient({ projects: initialProjects }: { projects: Project[] }) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [isAddProjectOpen, setAddProjectOpen] = useState(false);
+
+  useEffect(() => {
+    setProjects(initialProjects);
+  }, [initialProjects]);
 
   return (
     <div className="min-h-screen bg-muted/20">
