@@ -47,6 +47,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         title: 'Project Saved!',
         description: 'Your changes have been successfully saved.',
       });
+      router.refresh();
       router.push('/admin/dashboard');
     } else if (state.message) {
       toast({

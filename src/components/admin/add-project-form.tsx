@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 
 const initialState = {
   message: '',
@@ -38,6 +39,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
   const [state, formAction] = useActionState(onAddProject, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (state.message === 'success') {
@@ -47,6 +49,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
       });
       formRef.current?.reset();
       setDialogOpen(false);
+      router.refresh();
     } else if (state.message && state.message !== 'success') {
       toast({
         title: 'Error Adding Project',
@@ -54,7 +57,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
         variant: 'destructive',
       });
     }
-  }, [state, toast, setDialogOpen]);
+  }, [state, toast, setDialogOpen, router]);
 
   return (
     <Card className="border-0 shadow-none">
