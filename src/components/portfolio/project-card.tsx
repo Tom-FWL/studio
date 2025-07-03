@@ -165,19 +165,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
               )}
             </div>
 
-            <DialogHeader className="mb-8 text-center">
-              <Badge variant="secondary" className="mx-auto mb-4 w-fit text-sm">
-                {project.category}
-              </Badge>
-              <DialogTitle className="text-4xl md:text-5xl">{project.title}</DialogTitle>
-               <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
-                <Heart className="h-4 w-4 text-red-500 fill-current" />
-                <span>{likes} Likes</span>
+            <DialogHeader className="mb-8 text-left">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div>
+                      <Badge variant="secondary" className="mb-2">
+                          {project.category}
+                      </Badge>
+                      <DialogTitle className="text-4xl md:text-5xl font-headline">
+                          {project.title}
+                      </DialogTitle>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground shrink-0 pt-2">
+                      <Heart className="h-5 w-5 text-red-500 fill-current" />
+                      <span className="font-semibold text-lg">{likes} Likes</span>
+                  </div>
               </div>
             </DialogHeader>
 
-            <div className="max-w-3xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-12 mb-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-8 mb-8">
                 <aside className="md:col-span-1">
                   <h3 className="text-xl font-headline border-b pb-2 mb-4">Skills</h3>
                   <div className="flex flex-wrap gap-2">
@@ -189,7 +195,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   </div>
                 </aside>
 
-                <div className="md:col-span-2 space-y-8 font-body text-lg text-foreground/80">
+                <div className="md:col-span-2 space-y-6 font-body text-lg text-foreground/80">
                   <div>
                     <h3 className="text-2xl font-headline text-foreground mb-3">Project Goal</h3>
                     <p>{project.details.goal}</p>
