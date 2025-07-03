@@ -1,11 +1,17 @@
-import { projects } from "@/lib/data";
+"use client";
+
+import { projects as initialProjects } from "@/lib/data";
 import { ProjectsTable } from "@/components/admin/projects-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Shield, LogOut } from "lucide-react";
 import Link from "next/link";
 import { logout } from "./actions";
+import { useState } from "react";
+import type { Project } from "@/lib/types";
 
 export default function DashboardPage() {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
   return (
     <div className="min-h-screen bg-muted/20">
        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,7 +36,7 @@ export default function DashboardPage() {
             Add New Project
           </Button>
         </div>
-        <ProjectsTable projects={projects} />
+        <ProjectsTable projects={projects} setProjects={setProjects} />
       </main>
     </div>
   );

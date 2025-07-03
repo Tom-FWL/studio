@@ -24,21 +24,81 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 type ProjectsTableProps = {
   projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 };
 
-function handleNotImplemented() {
-    toast({
-        title: "Feature not implemented",
-        description: "This functionality is not yet available in this prototype.",
-    });
-}
+export function ProjectsTable({ projects, setProjects }: ProjectsTableProps) {
+  const { toast, dismiss } = useToast();
+  const [recentlyDeleted, setRecentlyDeleted] = useState<{ project: Project; index: number } | null>(null);
+  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-export function ProjectsTable({ projects }: ProjectsTableProps) {
+  useEffect(() => {
+    // Cleanup timeout on component unmount
+    return () => {
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleDeleteProject = (slug: string) => {
+    const projectIndex = projects.findIndex((p) => p.slug === slug);
+    if (projectIndex === -1) return;
+
+    const projectToDelete = projects[projectIndex];
+
+    // Clear any existing undo timeout
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+    }
+    
+    setRecentlyDeleted({ project: projectToDelete, index: projectIndex });
+    setProjects((currentProjects) => currentProjects.filter((p) => p.slug !== slug));
+
+    toast({
+      title: "Project deleted",
+      description: `"${projectToDelete.title}" has been removed.`,
+      action: (
+        <Button variant="secondary" size="sm" onClick={() => handleUndoDelete()}>
+          Undo
+        </Button>
+      ),
+    });
+
+    undoTimeoutRef.current = setTimeout(() => {
+      setRecentlyDeleted(null);
+      undoTimeoutRef.current = null;
+    }, 5000);
+  };
+  
+  const handleUndoDelete = () => {
+    if (!recentlyDeleted) return;
+
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      undoTimeoutRef.current = null;
+    }
+
+    setProjects((currentProjects) => {
+      const newProjects = [...currentProjects];
+      newProjects.splice(recentlyDeleted.index, 0, recentlyDeleted.project);
+      return newProjects;
+    });
+    
+    setRecentlyDeleted(null);
+    dismiss(); // Dismiss the "deleted" toast
+    toast({
+        title: "Restored",
+        description: "The project has been restored.",
+    });
+  };
+
   return (
     <div className="rounded-lg border bg-card">
       <Table>
@@ -107,7 +167,7 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={handleNotImplemented}
+                        onClick={() => handleDeleteProject(project.slug)}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         Delete
