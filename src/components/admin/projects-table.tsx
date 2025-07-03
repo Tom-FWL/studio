@@ -91,12 +91,13 @@ export function ProjectsTable({ projects, setProjects }: ProjectsTableProps) {
       return newProjects;
     });
     
-    setRecentlyDeleted(null);
     dismiss(); // Dismiss the "deleted" toast
     toast({
         title: "Restored",
-        description: "The project has been restored.",
+        description: `The project "${recentlyDeleted.project.title}" has been restored.`,
     });
+
+    setRecentlyDeleted(null);
   };
 
   return (
