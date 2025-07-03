@@ -7,21 +7,22 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Shield, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { logout } from '@/app/admin/dashboard/actions';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddProjectForm } from '@/components/admin/add-project-form';
-
 
 export function DashboardClient({ projects: initialProjects }: { projects: Project[] }) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [isAddProjectOpen, setAddProjectOpen] = useState(false);
 
+  // This effect ensures that if the parent component passes new projects (e.g., after a refresh),
+  // the local state is updated.
   useEffect(() => {
     setProjects(initialProjects);
   }, [initialProjects]);
 
   return (
     <div className="min-h-screen bg-muted/20">
-       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/admin/dashboard" className="flex items-center space-x-2">
             <Shield className="h-6 w-6 text-primary" />
@@ -44,10 +45,11 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] p-0">
-                <AddProjectForm setDialogOpen={setAddProjectOpen} />
+              <AddProjectForm setDialogOpen={setAddProjectOpen} />
             </DialogContent>
           </Dialog>
         </div>
+        {/* The `setProjects` prop is necessary for client-side optimistic updates like delete */}
         <ProjectsTable projects={projects} setProjects={setProjects} />
       </main>
     </div>
