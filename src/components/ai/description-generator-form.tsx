@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { onGenerate } from '@/app/admin/generate-description/actions';
 
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ function SubmitButton() {
 }
 
 export function DescriptionGeneratorForm() {
-  const [state, formAction] = useFormState(onGenerate, initialState);
+  const [state, formAction] = useActionState(onGenerate, initialState);
   const [description, setDescription] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
