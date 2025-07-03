@@ -1,0 +1,88 @@
+import type { Project } from './types';
+
+export const projects: Project[] = [
+  {
+    slug: 'ethereal-bloom',
+    title: 'Ethereal Bloom',
+    category: 'Branding',
+    description: 'A complete branding package for a luxury floral boutique, focusing on elegance and natural beauty.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'elegant flowers',
+    skills: ['Branding', 'Illustrator', 'Packaging Design'],
+    details: {
+      goal: 'Develop a sophisticated brand identity that appeals to a high-end clientele and communicates the artistic nature of the floral arrangements.',
+      process: 'The process involved extensive market research, mood boarding, and logo development. Multiple concepts were explored, focusing on delicate line art and a refined color palette. The final identity was applied to packaging, stationery, and a digital lookbook.',
+      outcome: 'The new branding elevated the boutique\'s market position, attracting its target audience and resulting in a significant increase in online inquiries and event bookings.',
+    },
+  },
+  {
+    slug: 'urban-canvas',
+    title: 'Urban Canvas',
+    category: 'Web Design',
+    description: 'An immersive website for a contemporary art gallery, designed to showcase artists and exhibitions.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'art gallery',
+    skills: ['Web Design', 'UI/UX', 'Figma', 'React'],
+    details: {
+      goal: 'Create a visually striking and user-friendly website that provides a digital extension of the gallery space, encouraging online engagement and ticket sales.',
+      process: 'We began with user journey mapping and wireframing to ensure intuitive navigation. The design phase focused on a minimalist, grid-based layout that prioritizes high-quality images of artwork. Subtle animations were added to enhance the browsing experience.',
+      outcome: 'The website launched to positive reviews from both gallery staff and visitors. It led to a 40% increase in online ticket sales and a noticeable growth in newsletter subscriptions.',
+    },
+  },
+  {
+    slug: 'nomad-supply',
+    title: 'Nomad Supply Co.',
+    category: 'E-commerce',
+    description: 'An e-commerce platform for a sustainable travel gear company, built for performance and user experience.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'travel gear',
+    skills: ['E-commerce', 'Shopify', 'Web Design', 'SEO'],
+    details: {
+      goal: 'Design and build a fast, mobile-first e-commerce store that tells the brand\'s story of sustainability and adventure, while maximizing conversions.',
+      process: 'The project started with a deep dive into the target audience. We designed a clean, intuitive interface that makes finding and purchasing products seamless. Custom Shopify development was used to implement unique features and optimize page load speeds.',
+      outcome: 'The new store saw a 60% increase in conversion rates and a 25% decrease in bounce rates. The brand\'s story is now front and center, resonating strongly with eco-conscious consumers.',
+    },
+  },
+  {
+    slug: 'mindful-journal',
+    title: 'Mindful Journal',
+    category: 'Mobile App',
+    description: 'A mobile app designed to promote mindfulness through guided journaling and mood tracking.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'journal app',
+    skills: ['UI/UX', 'Mobile App', 'Figma', 'Swift'],
+    details: {
+      goal: 'To create a calming and intuitive user interface that encourages daily use and helps users build a consistent journaling habit.',
+      process: 'The design process was heavily focused on user experience, with calming colors, gentle animations, and a clutter-free layout. We conducted user testing at each stage to refine the features and flow, ensuring the app was both beautiful and functional.',
+      outcome: 'The app received over 10,000 downloads in its first month and has maintained a 4.8-star rating. Users praise its simple design and positive impact on their mental well-being.',
+    },
+  },
+  {
+    slug: 'retro-futures',
+    title: 'Retro Futures',
+    category: 'Illustration',
+    description: 'A series of digital illustrations exploring retro-futuristic themes for a sci-fi book cover collection.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'retro future',
+    skills: ['Illustration', 'Photoshop', 'Procreate'],
+    details: {
+      goal: 'To capture the nostalgic yet forward-looking spirit of classic science fiction, creating compelling visuals that would attract readers.',
+      process: 'Each illustration began with hand-drawn sketches, which were then digitized and colored using a vibrant, high-contrast palette. The style combines vintage aesthetics with modern digital painting techniques to create a unique and eye-catching look.',
+      outcome: 'The illustration series was successfully licensed for a collection of republished sci-fi novels and was featured in a prominent design publication.',
+    },
+  },
+  {
+    slug: 'coastal-escape',
+    title: 'Coastal Escape',
+    category: 'Web Design',
+    description: 'A serene and elegant website for a luxury coastal hotel, focused on driving direct bookings.',
+    imageUrl: 'https://placehold.co/600x400.png',
+    imageHint: 'luxury hotel',
+    skills: ['Web Design', 'Booking Systems', 'Copywriting'],
+    details: {
+      goal: 'To design a website that immerses potential guests in the experience of staying at the hotel, using beautiful imagery and persuasive copy to increase direct bookings.',
+      process: 'We used large, high-quality photographs and video to create an atmospheric experience. The user flow was optimized for easy navigation and a simple, secure booking process. The copy was crafted to evoke feelings of relaxation and luxury.',
+      outcome: 'The new website contributed to a 30% increase in direct bookings, reducing reliance on third-party booking sites and increasing profit margins.',
+    },
+  },
+];

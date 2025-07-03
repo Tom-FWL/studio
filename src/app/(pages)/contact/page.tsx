@@ -1,0 +1,66 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Phone, MapPin } from "lucide-react";
+
+export default function ContactPage() {
+  return (
+    <div className="container mx-auto px-4 py-12 md:py-20">
+      <header className="text-center mb-12">
+        <h1 className="text-4xl md:text-6xl font-headline text-foreground mb-2">Get In Touch</h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          Have a project in mind or just want to say hello? I'd love to hear from you.
+        </p>
+      </header>
+
+      <div className="max-w-lg mx-auto">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-headline text-center">Contact Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-accent rounded-full">
+                <Mail className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Email</h3>
+                <a href="mailto:hello@artfolio.com" className="text-muted-foreground hover:text-primary transition-colors">
+                  hello@artfolio.com
+                </a>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-accent rounded-full">
+                <Phone className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Phone</h3>
+                <p className="text-muted-foreground">(123) 456-7890</p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-accent rounded-full">
+                <MapPin className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Location</h3>
+                <p className="text-muted-foreground">Creativity Lane, Design City</p>
+              </div>
+            </div>
+            
+            <div className="pt-4 text-center">
+              <Button asChild size="lg">
+                <a href="mailto:hello@artfolio.com">
+                  Send a Message
+                  <Mail className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
