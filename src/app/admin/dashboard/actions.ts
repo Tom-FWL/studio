@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { addProject } from '@/lib/project-service';
+import { addProject, deleteProject as deleteProjectFromDb } from '@/lib/project-service';
 
 export async function logout() {
   cookies().set("session", "", { expires: new Date(0) });
@@ -56,10 +56,23 @@ export async function onAddProject(prevState: FormState, data: FormData): Promis
     }
   };
 
-  await addProject(newProjectData);
+  const newProject = await addProject(newProjectData);
 
   revalidatePath('/');
   revalidatePath('/admin/dashboard');
+  revalidatePath(`/projects/${newProject.slug}`);
+  revalidatePath(`/admin/projects/${newProject.slug}/edit`);
 
   return { message: "success" };
+}
+
+export async function deleteProject(slug: string): Promise<{ message: string }> {
+  try {
+    await deleteProjectFromDb(slug);
+    revalidatePath('/');
+    revalidatePath('/admin/dashboard');
+    return { message: 'success' };
+  } catch (error) {
+    return { message: 'Failed to delete project.' };
+  }
 }

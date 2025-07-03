@@ -68,3 +68,11 @@ export async function updateProject(slug: string, projectData: Omit<Project, 'sl
     projects[projectIndex] = updatedProject;
     return updatedProject;
 }
+
+export async function deleteProject(slug: string): Promise<void> {
+    const projectIndex = projects.findIndex((p) => p.slug === slug);
+    if (projectIndex === -1) {
+        throw new Error('Project not found');
+    }
+    projects.splice(projectIndex, 1);
+}
