@@ -126,50 +126,52 @@ export default function AboutPage() {
         className="mt-20"
         variants={sectionVariant}
       >
-        <motion.h3 
-            className="text-2xl md:text-3xl font-headline text-foreground mb-8 border-l-4 border-primary pl-4"
-            variants={fadeInUp}
-        >
-            My Values
-        </motion.h3>
-        <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-3 gap-8"
-            variants={valuesContainer}
-        >
-            <motion.div 
-                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
-                variants={valueItem}
-                whileHover={valueCardHover}
+        <div className="grid md:grid-cols-3 gap-12 items-start">
+            <motion.h3 
+                className="md:col-span-1 text-2xl md:text-3xl font-headline text-foreground border-l-4 border-primary pl-4"
+                variants={fadeInUp}
             >
-                <Lightbulb className="w-12 h-12 text-primary mb-4" />
-                <h4 className="text-xl font-headline mb-2">Creativity</h4>
-                <p className="text-muted-foreground text-sm">
-                  Pushing boundaries and exploring new ideas to deliver unique and innovative solutions.
-                </p>
-            </motion.div>
+                My Values
+            </motion.h3>
             <motion.div 
-                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
-                variants={valueItem}
-                whileHover={valueCardHover}
+                className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-8"
+                variants={valuesContainer}
             >
-                <Heart className="w-12 h-12 text-primary mb-4" />
-                <h4 className="text-xl font-headline mb-2">Passion</h4>
-                <p className="text-muted-foreground text-sm">
-                  A genuine love for the craft, ensuring dedication and enthusiasm in every project.
-                </p>
+                <motion.div 
+                    className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                    variants={valueItem}
+                    whileHover={valueCardHover}
+                >
+                    <Lightbulb className="w-12 h-12 text-primary mb-4" />
+                    <h4 className="text-xl font-headline mb-2">Creativity</h4>
+                    <p className="text-muted-foreground text-sm">
+                      Pushing boundaries and exploring new ideas to deliver unique and innovative solutions.
+                    </p>
+                </motion.div>
+                <motion.div 
+                    className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                    variants={valueItem}
+                    whileHover={valueCardHover}
+                >
+                    <Heart className="w-12 h-12 text-primary mb-4" />
+                    <h4 className="text-xl font-headline mb-2">Passion</h4>
+                    <p className="text-muted-foreground text-sm">
+                      A genuine love for the craft, ensuring dedication and enthusiasm in every project.
+                    </p>
+                </motion.div>
+                <motion.div 
+                    className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
+                    variants={valueItem}
+                    whileHover={valueCardHover}
+                >
+                    <Award className="w-12 h-12 text-primary mb-4" />
+                    <h4 className="text-xl font-headline mb-2">Excellence</h4>
+                    <p className="text-muted-foreground text-sm">
+                      A commitment to the highest standards of quality and a meticulous attention to detail.
+                    </p>
+                </motion.div>
             </motion.div>
-            <motion.div 
-                className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
-                variants={valueItem}
-                whileHover={valueCardHover}
-            >
-                <Award className="w-12 h-12 text-primary mb-4" />
-                <h4 className="text-xl font-headline mb-2">Excellence</h4>
-                <p className="text-muted-foreground text-sm">
-                  A commitment to the highest standards of quality and a meticulous attention to detail.
-                </p>
-            </motion.div>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );
