@@ -29,9 +29,11 @@ export function SiteFooter() {
             </a>
           </Button>
         </div>
-        <Link href="/admin/generate-description" className="text-sm text-muted-foreground hover:text-primary">
-          AI Tool
-        </Link>
+        <Button variant="link" asChild className="text-sm text-muted-foreground hover:text-primary">
+          <Link href="/admin/login">
+            2001
+          </Link>
+        </Button>
       </div>
     </footer>
   );
