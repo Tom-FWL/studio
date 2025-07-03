@@ -1,7 +1,8 @@
 import { PortfolioGrid } from "@/components/portfolio/portfolio-grid";
-import { projects } from "@/lib/data";
+import { getProjects } from "@/lib/project-service";
 
-export default function Home() {
+export default async function Home() {
+  const projects = await getProjects();
   const categories = Array.from(new Set(projects.map((p) => p.category)));
 
   return (

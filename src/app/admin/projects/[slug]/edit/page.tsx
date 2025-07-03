@@ -1,10 +1,10 @@
-import { projects } from '@/lib/data';
 import type { Project } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import { EditProjectForm } from '@/components/admin/edit-project-form';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getProjectBySlug } from '@/lib/project-service';
 
 type EditProjectPageProps = {
   params: {
@@ -12,8 +12,8 @@ type EditProjectPageProps = {
   };
 };
 
-export default function EditProjectPage({ params }: EditProjectPageProps) {
-  const project: Project | undefined = projects.find((p) => p.slug === params.slug);
+export default async function EditProjectPage({ params }: EditProjectPageProps) {
+  const project: Project | undefined = await getProjectBySlug(params.slug);
 
   if (!project) {
     notFound();

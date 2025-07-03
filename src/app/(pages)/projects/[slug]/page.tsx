@@ -1,4 +1,4 @@
-import { projects } from '@/lib/data';
+import { getProjects, getProjectBySlug } from '@/lib/project-service';
 import type { Project } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -14,13 +14,14 @@ type ProjectPageProps = {
 };
 
 export async function generateStaticParams() {
+  const projects = await getProjects();
   return projects.map((project) => ({
     slug: project.slug,
   }));
 }
 
-export default function ProjectPage({ params }: ProjectPageProps) {
-  const project: Project | undefined = projects.find((p) => p.slug === params.slug);
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const project: Project | undefined = await getProjectBySlug(params.slug);
   const isVideo = project?.mediaType === 'video';
 
   if (!project) {
