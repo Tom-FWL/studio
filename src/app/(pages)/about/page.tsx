@@ -16,6 +16,7 @@ export default function AboutPage() {
     visible: {
       opacity: 1,
       transition: {
+        delayChildren: 0.2,
         staggerChildren: 0.8, // This will animate the direct children (the two main sections) in order
       },
     },
@@ -47,7 +48,7 @@ export default function AboutPage() {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.25,
+        staggerChildren: 0.2, // This will stagger the cards
       },
     },
   };
@@ -122,48 +123,52 @@ export default function AboutPage() {
 
       {/* SECTION 2: Values */}
       <motion.div 
-        className="mt-16"
+        className="mt-20"
         variants={sectionVariant}
       >
-        <motion.div variants={valuesContainer}>
-            <h3 className="text-2xl md:text-3xl font-headline text-foreground mb-6 border-l-4 border-primary pl-4">
-                My Values
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              <motion.div 
+        <motion.h3 
+            className="text-2xl md:text-3xl font-headline text-foreground mb-8 border-l-4 border-primary pl-4"
+            variants={fadeInUp}
+        >
+            My Values
+        </motion.h3>
+        <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-3 gap-8"
+            variants={valuesContainer}
+        >
+            <motion.div 
                 className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
                 variants={valueItem}
                 whileHover={valueCardHover}
-              >
+            >
                 <Lightbulb className="w-12 h-12 text-primary mb-4" />
                 <h4 className="text-xl font-headline mb-2">Creativity</h4>
                 <p className="text-muted-foreground text-sm">
                   Pushing boundaries and exploring new ideas to deliver unique and innovative solutions.
                 </p>
-              </motion.div>
-              <motion.div 
+            </motion.div>
+            <motion.div 
                 className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
                 variants={valueItem}
                 whileHover={valueCardHover}
-              >
+            >
                 <Heart className="w-12 h-12 text-primary mb-4" />
                 <h4 className="text-xl font-headline mb-2">Passion</h4>
                 <p className="text-muted-foreground text-sm">
                   A genuine love for the craft, ensuring dedication and enthusiasm in every project.
                 </p>
-              </motion.div>
-              <motion.div 
+            </motion.div>
+            <motion.div 
                 className="flex flex-col items-center text-center p-6 rounded-lg transition-shadow duration-300"
                 variants={valueItem}
                 whileHover={valueCardHover}
-              >
+            >
                 <Award className="w-12 h-12 text-primary mb-4" />
                 <h4 className="text-xl font-headline mb-2">Excellence</h4>
                 <p className="text-muted-foreground text-sm">
                   A commitment to the highest standards of quality and a meticulous attention to detail.
                 </p>
-              </motion.div>
-            </div>
+            </motion.div>
         </motion.div>
       </motion.div>
     </motion.div>

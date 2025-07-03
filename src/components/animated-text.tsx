@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion, useInView } from 'framer-motion';
@@ -27,7 +28,7 @@ const defaultAnimations = {
 export function AnimatedText({ text, el: Wrapper = 'p', className, staggerDelay = 0.05 }: AnimatedTextProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.5, once: true });
-  const words = text.split(' ');
+  const words = text.split(' ').filter(word => word.length > 0);
 
   return (
     <Wrapper className={className}>
@@ -43,9 +44,9 @@ export function AnimatedText({ text, el: Wrapper = 'p', className, staggerDelay 
           <motion.span
             key={index}
             variants={defaultAnimations}
-            className="inline-block"
+            className="inline-block mr-1.5"
           >
-            {word}{' '}
+            {word}
           </motion.span>
         ))}
       </motion.span>
