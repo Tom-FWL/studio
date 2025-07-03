@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 // A check to provide a more helpful error message if Firebase config is missing.
-if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
+if (!firebaseConfig.apiKey) {
   throw new Error(
     'Firebase API Key is missing. Please add your Firebase credentials to the .env file at the root of your project and restart the development server.'
   );
