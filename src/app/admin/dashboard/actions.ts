@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { addProject, deleteProject as deleteProjectFromDb } from '@/lib/project-service';
 
+
 export async function logout() {
   cookies().set("session", "", { expires: new Date(0) });
   redirect("/admin/login");

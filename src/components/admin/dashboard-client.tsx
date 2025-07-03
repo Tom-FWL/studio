@@ -27,12 +27,10 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
             <Shield className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">Admin Panel</span>
           </Link>
-          <form action={logout}>
-            <Button variant="ghost" type="submit">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </form>
+          <Button variant="ghost" onClick={() => logout()}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
