@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRouter } from 'next/navigation';
 
 const initialState = {
   message: '',
@@ -38,16 +39,23 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [state, formAction] = useActionState(onEditProject, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
-    if (state?.message) {
+    if (state.message === 'success') {
+      toast({
+        title: 'Project Saved!',
+        description: 'Your changes have been successfully saved.',
+      });
+      router.push('/admin/dashboard');
+    } else if (state.message) {
       toast({
         title: 'Error Saving Project',
         description: state.message,
         variant: 'destructive',
       });
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   return (
     <Card>
@@ -119,11 +127,6 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                   required
                 />
               </div>
-              {state?.message && (
-                  <div className="text-destructive text-sm">
-                    <p>{state.message}</p>
-                  </div>
-                )}
             </div>
           </ScrollArea>
         </CardContent>

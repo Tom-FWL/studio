@@ -3,7 +3,6 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { updateProject } from '@/lib/project-service';
-import { redirect } from 'next/navigation';
 
 const formSchema = z.object({
   slug: z.string(),
@@ -48,12 +47,16 @@ export async function onEditProject(prevState: FormState, data: FormData): Promi
     }
   };
 
-  await updateProject(slug, projectUpdateData);
+  try {
+    await updateProject(slug, projectUpdateData);
 
-  revalidatePath('/');
-  revalidatePath('/admin/dashboard');
-  revalidatePath(`/projects/${slug}`);
-  revalidatePath(`/admin/projects/${slug}/edit`);
+    revalidatePath('/');
+    revalidatePath('/admin/dashboard');
+    revalidatePath(`/projects/${slug}`);
+    revalidatePath(`/admin/projects/${slug}/edit`);
 
-  redirect('/admin/dashboard');
+    return { message: 'success' };
+  } catch (error) {
+    return { message: 'Failed to update project. Please try again.' };
+  }
 }
