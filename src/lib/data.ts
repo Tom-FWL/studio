@@ -8,6 +8,7 @@ export const projects: Project[] = [
     description: 'A complete branding package for a luxury floral boutique, focusing on elegance and natural beauty.',
     imageUrl: 'https://placehold.co/600x400.png',
     imageHint: 'elegant flowers',
+    audioUrl: '/audio/ethereal-bloom-theme.mp3',
     skills: ['Branding', 'Illustrator', 'Packaging Design'],
     details: {
       goal: 'Develop a sophisticated brand identity that appeals to a high-end clientele and communicates the artistic nature of the floral arrangements.',

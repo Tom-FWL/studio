@@ -5,6 +5,7 @@ export type Project = {
   description: string;
   imageUrl: string;
   imageHint: string;
+  audioUrl?: string;
   skills: string[];
   details: {
     goal: string;
