@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { projects } from "@/lib/data";
 import { ProjectsTable } from "@/components/admin/projects-table";
 import { Button } from "@/components/ui/button";
@@ -8,13 +6,6 @@ import Link from "next/link";
 import { logout } from "./actions";
 
 export default function DashboardPage() {
-  const cookieStore = cookies();
-  const session = cookieStore.get("session");
-
-  if (!session || session.value !== "authenticated") {
-    redirect("/admin/login");
-  }
-
   return (
     <div className="min-h-screen bg-muted/20">
        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
