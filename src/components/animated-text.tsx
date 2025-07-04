@@ -9,6 +9,7 @@ type AnimatedTextProps = {
   el?: keyof JSX.IntrinsicElements;
   className?: string;
   staggerDelay?: number;
+  delay?: number;
 };
 
 const defaultAnimations = {
@@ -25,7 +26,7 @@ const defaultAnimations = {
   },
 };
 
-export function AnimatedText({ text, el: Wrapper = 'p', className, staggerDelay = 0.05 }: AnimatedTextProps) {
+export function AnimatedText({ text, el: Wrapper = 'p', className, staggerDelay = 0.05, delay = 0 }: AnimatedTextProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.5, once: true });
   const words = text.split(' ').filter(word => word.length > 0);
@@ -37,7 +38,7 @@ export function AnimatedText({ text, el: Wrapper = 'p', className, staggerDelay 
         ref={ref}
         initial="hidden"
         animate={isInView ? 'visible' : 'hidden'}
-        transition={{ staggerChildren: staggerDelay }}
+        transition={{ staggerChildren: staggerDelay, delayChildren: delay }}
         aria-hidden
       >
         {words.map((word, index) => (

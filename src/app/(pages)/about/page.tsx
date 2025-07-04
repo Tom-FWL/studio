@@ -10,6 +10,10 @@ export default function AboutPage() {
   const story1 = "From a young age, I've been captivated by the intersection of art and technology. This passion has guided my journey, leading me to explore various facets of digital creation—from intricate branding projects to immersive web experiences. I believe that great design is not just about aesthetics, but about telling a story and creating a meaningful connection with the audience.";
   const story2 = "My work is driven by a minimalist philosophy, where clarity and purpose are paramount. I strive to create designs that are not only beautiful but also intuitive and effective. Every line, color, and interaction is carefully considered to contribute to a cohesive and engaging user experience.";
 
+  const stagger = 0.06;
+  const story1WordCount = story1.split(' ').length;
+  const story2Delay = story1WordCount * stagger + 0.5; // Calculate delay for second paragraph
+
   // Parent container that orchestrates the entire page animation sequence
   const pageContainer = {
     hidden: { opacity: 0 },
@@ -113,8 +117,8 @@ export default function AboutPage() {
                 My Story
               </h2>
               <div className="space-y-6 text-lg text-foreground/80 font-body">
-                 <AnimatedText text={story1} staggerDelay={0.06} className="text-lg text-foreground/80 font-body" />
-                 <AnimatedText text={story2} staggerDelay={0.06} className="text-lg text-foreground/80 font-body" />
+                 <AnimatedText text={story1} staggerDelay={stagger} className="text-lg text-foreground/80 font-body" />
+                 <AnimatedText text={story2} staggerDelay={stagger} delay={story2Delay} className="text-lg text-foreground/80 font-body" />
               </div>
             </div>
           </div>
