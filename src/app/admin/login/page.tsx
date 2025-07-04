@@ -14,28 +14,30 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Terminal } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { LogIn } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setIsLoading(true);
 
     try {
       await login(email, password);
       router.push("/admin/dashboard");
     } catch (err: any) {
-      setError("You seems sus, going into admin.");
+      toast({
+        description: "You seems sus, going into admin.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +80,6 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            {error && (
-              <Alert variant="destructive">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Authentication Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
           </CardContent>
           <CardFooter>
             <Button className="w-full" type="submit" disabled={isLoading}>
