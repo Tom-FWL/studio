@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
@@ -58,17 +59,17 @@ export function ContactForm() {
     <form ref={formRef} action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" required />
+        <Input id="name" name="name" placeholder="Your Name" required />
         {state.errors?.name && <p className="text-sm text-destructive">{state.errors.name[0]}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required />
+        <Input id="email" name="email" type="email" placeholder="Your E-mail" required />
         {state.errors?.email && <p className="text-sm text-destructive">{state.errors.email[0]}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="message">Message</Label>
-        <Textarea id="message" name="message" className="min-h-[120px]" required />
+        <Textarea id="message" name="message" placeholder="What’s on your mind?" className="min-h-[120px]" required />
         {state.errors?.message && <p className="text-sm text-destructive">{state.errors.message[0]}</p>}
       </div>
       <div>
