@@ -30,6 +30,7 @@ export default function ContactPage() {
               </div>
             </div>
             
+            {/*
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-accent rounded-full">
                 <Phone className="h-6 w-6 text-accent-foreground" />
@@ -39,6 +40,7 @@ export default function ContactPage() {
                 <p className="text-muted-foreground">(123) 456-7890</p>
               </div>
             </div>
+            */}
 
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-accent rounded-full">
@@ -46,7 +48,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold">Location</h3>
-                <p className="text-muted-foreground">Creativity Lane, Design City</p>
+                <p className="text-muted-foreground">Kuala Lumpur, Malaysia</p>
               </div>
             </div>
         </div>
