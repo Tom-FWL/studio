@@ -5,14 +5,45 @@ import Image from "next/image";
 import { Award, Lightbulb, Heart } from "lucide-react";
 import { motion } from 'framer-motion';
 import { AnimatedText } from "@/components/animated-text";
+import { useState, useEffect } from 'react';
 
 export default function AboutPage() {
+  const [initialState, setInitialState] = useState("hidden");
+
+  useEffect(() => {
+    try {
+      const animationKey = 'tommys-desk-about-animation';
+      const animationData = localStorage.getItem(animationKey);
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      if (animationData) {
+        const { lastSeen } = JSON.parse(animationData);
+        if (Date.now() - lastSeen < oneDay) {
+          // Less than 24 hours have passed, so don't animate.
+          setInitialState("visible");
+        } else {
+          // More than 24 hours, so animate and update the timestamp.
+          localStorage.setItem(animationKey, JSON.stringify({ lastSeen: Date.now() }));
+          setInitialState("hidden");
+        }
+      } else {
+        // First visit, so animate and set the timestamp.
+        localStorage.setItem(animationKey, JSON.stringify({ lastSeen: Date.now() }));
+        setInitialState("hidden");
+      }
+    } catch (error) {
+      console.error("Could not access localStorage. Defaulting to play animation once per page load.", error);
+      // Fallback for SSR or if localStorage is disabled. The animation will play.
+      setInitialState("hidden");
+    }
+  }, []);
+
   const story1 = "From a young age, I've been captivated by the intersection of art and technology. This passion has guided my journey, leading me to explore various facets of digital creation—from intricate branding projects to immersive web experiences. I believe that great design is not just about aesthetics, but about telling a story and creating a meaningful connection with the audience.";
   const story2 = "My work is driven by a minimalist philosophy, where clarity and purpose are paramount. I strive to create designs that are not only beautiful but also intuitive and effective. Every line, color, and interaction is carefully considered to contribute to a cohesive and engaging user experience.";
 
   const stagger = 0.06;
   const story1WordCount = story1.split(' ').length;
-  const story2Delay = story1WordCount * stagger + 0.5; // Calculate delay for second paragraph
+  const story2Delay = initialState === 'hidden' ? story1WordCount * stagger + 0.5 : 0; // Calculate delay for second paragraph only if animating
 
   // Parent container that orchestrates the entire page animation sequence
   const pageContainer = {
@@ -72,7 +103,7 @@ export default function AboutPage() {
     <motion.div 
       className="container mx-auto px-4 py-12 md:py-20 overflow-x-hidden"
       variants={pageContainer}
-      initial="hidden"
+      initial={initialState}
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
     >
