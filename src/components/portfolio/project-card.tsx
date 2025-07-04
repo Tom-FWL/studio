@@ -223,7 +223,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
               <div className="text-center border-t pt-8">
                  <Button asChild size="lg">
-                    <a href={`mailto:hello@artfolio.com?subject=Inquiry about the '${project.title}' project`}>
+                    <a href={`mailto:hello@tommysdesk.com?subject=Inquiry about the '${project.title}' project`}>
                       <Mail className="mr-2 h-4 w-4" />
                       Request More Info
                     </a>

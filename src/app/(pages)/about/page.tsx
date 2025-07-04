@@ -96,7 +96,7 @@ export default function AboutPage() {
               className="text-4xl font-headline text-primary"
               variants={fadeInUp}
             >
-              Hello, I'm Artfolio
+              Hello, I'm Tommy
             </motion.h1>
             <motion.p 
               className="text-muted-foreground mt-2"

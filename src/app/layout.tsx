@@ -20,7 +20,7 @@ const fontBody = Alegreya({
 });
 
 export const metadata: Metadata = {
-  title: 'Artfolio - Personal Portfolio',
+  title: 'Tommy’s Desk - Personal Portfolio',
   description: 'A personal portfolio website with an artsy but minimal design.',
 };
 
