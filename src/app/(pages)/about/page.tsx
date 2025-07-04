@@ -43,7 +43,10 @@ export default function AboutPage() {
 
   const stagger = 0.06;
   const story1WordCount = story1.split(' ').length;
-  const story2Delay = initialState === 'hidden' ? story1WordCount * stagger + 0.5 : 0; // Calculate delay for second paragraph only if animating
+  // Calculate the delay for the second paragraph based on the first paragraph's animation duration.
+  const story2Delay = story1WordCount * stagger + 0.5;
+  // Determine if animations should run based on visit history.
+  const shouldAnimate = initialState === 'hidden';
 
   // Parent container that orchestrates the entire page animation sequence
   const pageContainer = {
@@ -148,8 +151,17 @@ export default function AboutPage() {
                 My Story
               </h2>
               <div className="space-y-6 text-lg text-foreground/80 font-body">
-                 <AnimatedText text={story1} staggerDelay={stagger} className="text-lg text-foreground/80 font-body" />
-                 <AnimatedText text={story2} staggerDelay={stagger} delay={story2Delay} className="text-lg text-foreground/80 font-body" />
+                {shouldAnimate ? (
+                  <>
+                    <AnimatedText text={story1} staggerDelay={stagger} className="text-lg text-foreground/80 font-body" />
+                    <AnimatedText text={story2} staggerDelay={stagger} delay={story2Delay} className="text-lg text-foreground/80 font-body" />
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg text-foreground/80 font-body">{story1}</p>
+                    <p className="text-lg text-foreground/80 font-body">{story2}</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
