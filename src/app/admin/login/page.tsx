@@ -35,7 +35,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/admin/dashboard");
     } catch (err: any) {
-      setError(err.message || "An unknown error occurred.");
+      setError("You seems sus, going into admin.");
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +62,6 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="admin@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -74,7 +73,6 @@ export default function LoginPage() {
                 id="password" 
                 name="password" 
                 type="password" 
-                placeholder="password" 
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
