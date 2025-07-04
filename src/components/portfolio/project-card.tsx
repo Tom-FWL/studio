@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
@@ -225,10 +226,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
               <div className="text-center border-t pt-8">
                  <Button asChild size="lg">
-                    <a href={`mailto:hello@tommysdesk.com?subject=Inquiry about the '${project.title}' project`}>
+                    <Link href={{ pathname: '/contact', query: { project: project.title } }}>
                       <Mail className="mr-2 h-4 w-4" />
                       Request More Info
-                    </a>
+                    </Link>
                   </Button>
               </div>
 

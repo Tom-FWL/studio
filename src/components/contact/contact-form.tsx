@@ -34,10 +34,14 @@ function SubmitButton() {
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ projectTitle }: { projectTitle?: string }) {
   const [state, formAction] = useActionState(onContactSubmit, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+
+  const defaultMessage = projectTitle
+    ? `Re: ${projectTitle}\n\nHey Tommy, ...`
+    : '';
 
   useEffect(() => {
     if (state.message === 'success') {
@@ -69,7 +73,14 @@ export function ContactForm() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="message">Message</Label>
-        <Textarea id="message" name="message" placeholder="What’s on your mind?" className="min-h-[120px]" required />
+        <Textarea 
+          id="message" 
+          name="message" 
+          placeholder="What’s on your mind?" 
+          className="min-h-[120px]" 
+          required 
+          defaultValue={defaultMessage}
+        />
         {state.errors?.message && <p className="text-sm text-destructive">{state.errors.message[0]}</p>}
       </div>
       <div>

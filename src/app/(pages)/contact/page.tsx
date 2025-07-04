@@ -1,7 +1,10 @@
+
 import { ContactForm } from "@/components/contact/contact-form";
 import { Mail, Phone, MapPin } from "lucide-react";
 
-export default function ContactPage() {
+export default function ContactPage({ searchParams }: { searchParams?: { project?: string } }) {
+  const projectTitle = searchParams?.project;
+
   return (
     <div className="container mx-auto px-4 py-12 md:py-20">
       <header className="text-center mb-12">
@@ -11,10 +14,18 @@ export default function ContactPage() {
         </p>
       </header>
 
+      {projectTitle && (
+        <div className="text-center mb-8 bg-primary/10 p-4 rounded-md max-w-4xl mx-auto">
+          <p className="text-primary">
+            You're inquiring about the project: <span className="font-semibold">&quot;{projectTitle}&quot;</span>
+          </p>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
         <div>
           <h2 className="text-2xl font-headline mb-4">Send a Message</h2>
-          <ContactForm />
+          <ContactForm projectTitle={projectTitle} />
         </div>
         <div className="space-y-8">
             <h2 className="text-2xl font-headline mb-4">Contact Information</h2>
