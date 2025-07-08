@@ -84,12 +84,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
       className={cn(
         "flex items-center gap-1.5 text-sm text-muted-foreground transition-colors",
         !isLiked && "hover:text-primary",
-        isLiked && "cursor-default",
-        likes > 0 && "text-red-500"
+        isLiked && "cursor-default text-red-500"
       )}
       aria-label="Like project"
     >
-      <Heart className={cn("h-4 w-4", likes > 0 && "fill-current")} />
+      <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
       <span>{likes}</span>
     </motion.button>
   );
@@ -202,7 +201,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                       </DialogTitle>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground shrink-0 pt-2">
-                      <Heart className={cn("h-5 w-5", likes > 0 ? "text-red-500 fill-current" : "")} />
+                      <Heart className={cn("h-5 w-5", isLiked ? "text-red-500 fill-current" : "")} />
                       <span className="font-semibold text-lg">{likes} Likes</span>
                   </div>
               </div>
