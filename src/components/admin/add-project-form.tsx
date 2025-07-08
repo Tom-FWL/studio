@@ -12,12 +12,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { addProject } from '@/lib/project-service';
 import { z } from 'zod';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
+import { Progress } from '@/components/ui/progress';
 
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required."),
   category: z.string().min(1, "Category is required."),
   skills: z.string().min(1, "Please list at least one skill."),
-  mediaUrl: z.string().url("Please enter a valid media URL."),
   mediaHint: z.string().optional(),
   description: z.string().min(10, "Description is required."),
   goal: z.string().min(10, "Goal is required."),
@@ -25,60 +28,61 @@ const projectSchema = z.object({
   outcome: z.string().min(10, "Outcome is required."),
 });
 
+const initialFormData = {
+    title: '', category: '', skills: '',
+    mediaHint: '', description: '', goal: '', process: '', outcome: '',
+};
 
 export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    skills: '',
-    mediaUrl: 'https://placehold.co/600x400.png',
-    mediaHint: '',
-    description: '',
-    goal: '',
-    process: '',
-    outcome: '',
-  });
   const [isFormValid, setIsFormValid] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(formData.mediaUrl);
-
-  const isImageUrl = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(previewUrl);
+  
+  const [formData, setFormData] = useState(initialFormData);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const result = projectSchema.safeParse(formData);
-    setIsFormValid(result.success);
-  }, [formData]);
-
-  const resetForm = () => {
-    const initialFormData = {
-      title: '', category: '', skills: '',
-      mediaUrl: 'https://placehold.co/600x400.png',
-      mediaHint: '', description: '', goal: '', process: '', outcome: '',
-    };
-    setFormData(initialFormData);
-    setPreviewUrl(initialFormData.mediaUrl);
-    formRef.current?.reset();
+    setIsFormValid(result.success && file !== null);
+  }, [formData, file]);
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile);
+        setMediaPreview(URL.createObjectURL(selectedFile));
+    }
   };
 
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setFile(null);
+    setMediaPreview(null);
+    setUploadProgress(null);
+    formRef.current?.reset();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'mediaUrl') {
-        setPreviewUrl(value);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const result = projectSchema.safeParse(formData);
-    if (!result.success) {
+    if (!file) {
+        toast({ title: 'Media file is required.', variant: 'destructive' });
+        setIsLoading(false);
+        return;
+    }
+
+    const validationResult = projectSchema.safeParse(formData);
+    if (!validationResult.success) {
       toast({
         title: 'Invalid Form Data',
         description: 'Please fill out all required fields correctly.',
@@ -88,41 +92,59 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
       return;
     }
     
-    const { title, category, skills, mediaUrl, mediaHint, description, goal, process, outcome } = result.data;
-  
-    const newProjectData = {
-      title,
-      category,
-      description,
-      skills: skills.split(",").map(s => s.trim()),
-      mediaUrl,
-      mediaHint: mediaHint || 'new project',
-      details: {
-        goal,
-        process,
-        outcome,
-      }
-    };
-  
-    try {
-      await addProject(newProjectData);
-      toast({
-        title: 'Project Added',
-        description: 'The new project has been added successfully.',
-      });
-      resetForm();
-      setDialogOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to add project:", error);
-      toast({
-        title: 'Error Adding Project',
-        description: 'Failed to add project to the database. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExtension}`;
+    const storageRef = ref(storage, `media/${fileName}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+        },
+        (error) => {
+            console.error("Upload failed:", error);
+            toast({ title: "Upload Failed", description: "Could not upload media file.", variant: "destructive" });
+            setIsLoading(false);
+            setUploadProgress(null);
+        },
+        async () => {
+            try {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                
+                let mediaType: 'image' | 'video' | 'audio' = 'image';
+                if (file.type.startsWith('video/')) mediaType = 'video';
+                else if (file.type.startsWith('audio/')) mediaType = 'audio';
+
+                const newProjectData = {
+                  ...validationResult.data,
+                  skills: validationResult.data.skills.split(",").map(s => s.trim()),
+                  mediaUrl: downloadURL,
+                  mediaType,
+                  mediaHint: validationResult.data.mediaHint || 'new project',
+                  details: {
+                    goal: validationResult.data.goal,
+                    process: validationResult.data.process,
+                    outcome: validationResult.data.outcome,
+                  }
+                };
+
+                await addProject(newProjectData as any); // Cast because details are nested
+                
+                toast({ title: 'Project Added', description: 'The new project has been added successfully.' });
+                resetForm();
+                setDialogOpen(false);
+                router.refresh();
+
+            } catch (error) {
+                console.error("Failed to add project:", error);
+                toast({ title: 'Error Adding Project', description: 'Failed to add project to the database.', variant: 'destructive' });
+            } finally {
+                setIsLoading(false);
+                setUploadProgress(null);
+            }
+        }
+    );
   }
 
   return (
@@ -148,14 +170,22 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                       <Input id="skills" name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g., Figma, Next.js, Illustrator" required />
                   </div>
                   <div className="space-y-2">
-                      <Label htmlFor="mediaUrl">Media URL (Image or .mp4) *</Label>
-                      <Input id="mediaUrl" name="mediaUrl" type="url" value={formData.mediaUrl} onChange={handleChange} required />
-                      {isImageUrl && (
-                          <div className="mt-2 rounded-md border p-2 bg-muted/50">
-                              <p className="text-sm text-muted-foreground mb-2">Image Preview:</p>
-                              <img src={previewUrl} alt="Media preview" className="rounded-md object-cover w-full h-auto max-h-48" onError={(e) => e.currentTarget.style.display='none'} />
-                          </div>
-                      )}
+                    <Label htmlFor="media">Media File (Image, Video, Audio) *</Label>
+                    <Input id="media" name="media" type="file" accept="image/*,video/*,audio/*" onChange={handleFileChange} required />
+                    {uploadProgress !== null && (
+                      <div className="mt-2 space-y-1">
+                        <Label className='text-xs'>Upload Progress</Label>
+                        <Progress value={uploadProgress} />
+                      </div>
+                    )}
+                    {mediaPreview && file && (
+                        <div className="mt-2 rounded-md border p-2 bg-muted/50">
+                            <p className="text-sm text-muted-foreground mb-2">Media Preview:</p>
+                            {file.type.startsWith('image/') && <img src={mediaPreview} alt="Media preview" className="rounded-md object-cover w-full h-auto max-h-48" />}
+                            {file.type.startsWith('video/') && <video src={mediaPreview} controls className="rounded-md w-full h-auto max-h-48" />}
+                            {file.type.startsWith('audio/') && <audio src={mediaPreview} controls className="w-full" />}
+                        </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                       <Label htmlFor="mediaHint">Image Description (for AI &amp; SEO)</Label>
@@ -186,7 +216,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
+                    {uploadProgress !== null ? `Uploading... ${Math.round(uploadProgress)}%` : 'Processing...'}
                   </>
                 ) : (
                   <>

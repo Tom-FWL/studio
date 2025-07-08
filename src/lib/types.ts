@@ -6,8 +6,7 @@ export type Project = {
   description: string;
   mediaUrl: string;
   mediaHint: string;
-  mediaType: 'image' | 'video';
-  audioUrl?: string;
+  mediaType: 'image' | 'video' | 'audio';
   skills: string[];
   details: {
     goal: string;

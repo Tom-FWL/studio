@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
-import { ArrowRight, Mail, Heart } from 'lucide-react';
+import { ArrowRight, Mail, Heart, Music } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,6 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const isVideo = project.mediaType === 'video';
   const { toast } = useToast();
 
   const [likes, setLikes] = useState(project.likes || 0);
@@ -100,8 +99,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <DialogTrigger asChild>
         <Card className="group h-full cursor-pointer overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
           <CardHeader className="p-0">
-            <div className="aspect-video overflow-hidden bg-black">
-              {isVideo ? (
+            <div className="aspect-video overflow-hidden bg-black relative">
+              {project.mediaType === 'image' ? (
+                <Image
+                  src={project.mediaUrl}
+                  alt={project.title}
+                  width={600}
+                  height={400}
+                  data-ai-hint={project.mediaHint}
+                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                />
+              ) : project.mediaType === 'video' ? (
                 <video
                   key={project.mediaUrl}
                   src={project.mediaUrl}
@@ -114,14 +122,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   playsInline
                 />
               ) : (
-                <Image
-                  src={project.mediaUrl}
-                  alt={project.title}
-                  width={600}
-                  height={400}
-                  data-ai-hint={project.mediaHint}
-                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                />
+                 <>
+                  <Image
+                    src="https://placehold.co/600x400.png"
+                    alt={project.title}
+                    width={600}
+                    height={400}
+                    data-ai-hint="music audio track"
+                    className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <Music className="h-16 w-16 text-white/80" />
+                  </div>
+                </>
               )}
             </div>
           </CardHeader>
@@ -144,8 +157,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <DialogContent className="max-w-4xl p-0">
         <ScrollArea className="max-h-[90vh]">
           <div className="p-6 md:p-8">
-            <div className="mb-8 rounded-lg overflow-hidden shadow-xl bg-black">
-              {isVideo ? (
+            <div className="mb-8 rounded-lg overflow-hidden shadow-xl bg-muted flex items-center justify-center">
+             {project.mediaType === 'image' && (
+                <Image
+                  src={project.mediaUrl}
+                  alt={`Showcase image for ${project.title}`}
+                  width={1200}
+                  height={675}
+                  className="w-full object-cover"
+                  data-ai-hint={project.mediaHint}
+                />
+              )}
+              {project.mediaType === 'video' && (
                  <video
                   src={project.mediaUrl}
                   width={1200}
@@ -156,15 +179,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   controls
                   muted
                 />
-              ) : (
-                <Image
-                  src={project.mediaUrl}
-                  alt={`Showcase image for ${project.title}`}
-                  width={1200}
-                  height={675}
-                  className="w-full object-cover"
-                  data-ai-hint={project.mediaHint}
-                />
+              )}
+              {project.mediaType === 'audio' && (
+                <div className="p-8 w-full aspect-video flex flex-col items-center justify-center bg-black text-white">
+                  <Music className="h-24 w-24 text-primary mb-4" />
+                  <audio controls className="w-full max-w-lg">
+                    <source src={project.mediaUrl} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
               )}
             </div>
 
@@ -214,16 +237,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 </div>
               </div>
               
-              {project.audioUrl && (
-                <div className="my-8 border-t pt-8">
-                  <h3 className="text-2xl font-headline text-foreground mb-3 text-center">Project Audio</h3>
-                    <audio controls className="w-full">
-                    <source src={project.audioUrl} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
-              )}
-
               <div className="text-center border-t pt-8">
                  <Button asChild size="lg">
                     <Link href={{ pathname: '/contact', query: { project: project.title } }}>

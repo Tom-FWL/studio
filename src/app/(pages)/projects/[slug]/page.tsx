@@ -3,7 +3,7 @@ import type { Project } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Music } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -22,7 +22,6 @@ export async function generateStaticParams() {
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const project: Project | undefined = await getProjectBySlug(params.slug);
-  const isVideo = project?.mediaType === 'video';
 
   if (!project) {
     notFound();
@@ -44,8 +43,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <h1 className="text-4xl md:text-6xl font-headline text-foreground">{project.title}</h1>
       </header>
 
-      <div className="mb-12 rounded-lg overflow-hidden shadow-xl bg-black">
-        {isVideo ? (
+      <div className="mb-12 rounded-lg overflow-hidden shadow-xl bg-muted flex items-center justify-center">
+        {project.mediaType === 'image' && (
+           <Image
+            src={project.mediaUrl}
+            alt={`Showcase image for ${project.title}`}
+            width={1200}
+            height={675}
+            className="w-full object-cover"
+            data-ai-hint={project.mediaHint}
+          />
+        )}
+        {project.mediaType === 'video' && (
           <video
             src={project.mediaUrl}
             width={1200}
@@ -56,15 +65,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             controls
             muted
           />
-        ) : (
-          <Image
-            src={project.mediaUrl}
-            alt={`Showcase image for ${project.title}`}
-            width={1200}
-            height={675}
-            className="w-full object-cover"
-            data-ai-hint={project.mediaHint}
-          />
+        )}
+        {project.mediaType === 'audio' && (
+           <div className="p-8 w-full aspect-video flex flex-col items-center justify-center bg-black text-white">
+              <Music className="h-24 w-24 text-primary mb-4" />
+              <audio controls className="w-full max-w-lg">
+                <source src={project.mediaUrl} type="audio/mpeg" />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
         )}
       </div>
 

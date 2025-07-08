@@ -14,8 +14,6 @@ function slugify(text: string) {
     .replace(/-+$/, ''); // Trim - from end of text
 }
 
-const getMediaType = (url: string) => (url.endsWith('.mp4') ? 'video' : 'image');
-
 // Helper to safely convert Firestore data to a serializable Project object
 function toSerializableProject(doc: any): Project {
     const data = doc.data();
@@ -29,7 +27,7 @@ function toSerializableProject(doc: any): Project {
 
 
 // Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'mediaType' | 'createdAt' | 'audioUrl' | 'likes'>): Promise<Project> {
+export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'createdAt' | 'likes'>): Promise<Project> {
   let slug = slugify(projectData.title);
   
   // Ensure slug is unique
@@ -42,7 +40,6 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'med
   const newProjectData = {
     ...projectData,
     slug,
-    mediaType: getMediaType(projectData.mediaUrl),
     createdAt: serverTimestamp(),
     likes: 0,
   };
@@ -86,12 +83,9 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 }
 
 // Update an existing project in Firestore
-export async function updateProject(id: string, projectData: Omit<Project, 'id' | 'slug' | 'mediaType' | 'createdAt' | 'audioUrl' | 'likes'>): Promise<void> {
+export async function updateProject(id: string, projectData: Partial<Omit<Project, 'id' | 'slug'>>): Promise<void> {
   const projectDoc = doc(db, 'projects', id);
-  await updateDoc(projectDoc, {
-    ...projectData,
-    mediaType: getMediaType(projectData.mediaUrl),
-  });
+  await updateDoc(projectDoc, projectData);
 }
 
 // Increment likes for a project
