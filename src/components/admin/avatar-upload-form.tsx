@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, type FormEvent } from 'react';
@@ -11,7 +12,7 @@ import { storage, auth } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
-import { updateProfileSettings } from '@/lib/settings-service';
+import { updateProfileSettings, SETTINGS_COLLECTION } from '@/lib/settings-service';
 import { useRouter } from 'next/navigation';
 
 export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvatar?: string; setDialogOpen: (open: boolean) => void }) {
@@ -70,7 +71,7 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
           if (error instanceof Error) {
             // Check for Firestore permission error
             if (error.message.includes("Missing or insufficient permissions")) {
-              errorMessage = "Permission denied. Please check your Firestore security rules to allow writes to the 'settings' collection for authenticated users.";
+              errorMessage = `Permission denied. Please check your Firestore security rules to allow writes to the '${SETTINGS_COLLECTION}' collection for authenticated users.`;
             } else {
               errorMessage = error.message;
             }
