@@ -14,7 +14,7 @@ import { Save, Loader2, Music } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-import { storage } from '@/lib/firebase';
+import { storage, auth } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { Progress } from '@/components/ui/progress';
@@ -76,6 +76,12 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!auth.currentUser) {
+      toast({ title: 'Authentication Error', description: 'You must be logged in to upload files. Please log out and log in again.', variant: 'destructive' });
+      setIsLoading(false);
+      return;
+    }
+
     const result = editSchema.safeParse(formData);
     if (!result.success) {
       toast({
@@ -116,7 +122,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
     if (file) {
       const fileExtension = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`;
-      const storageRef = ref(storage, `media/${fileName}`);
+      const storageRef = ref(storage, `media/${project.id}/${fileName}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on('state_changed',
@@ -126,7 +132,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          toast({ title: "Upload Failed", description: "Could not upload new media file.", variant: "destructive" });
+          toast({ title: "Upload Failed", description: "Could not upload new media file. Check console for details.", variant: "destructive" });
           setIsLoading(false);
           setUploadProgress(null);
         },

@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { addProject } from '@/lib/project-service';
 import { z } from 'zod';
-import { storage } from '@/lib/firebase';
+import { storage, auth } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { Progress } from '@/components/ui/progress';
@@ -76,6 +76,12 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     e.preventDefault();
     setIsLoading(true);
 
+    if (!auth.currentUser) {
+        toast({ title: 'Authentication Error', description: 'You must be logged in to upload files. Please log out and log in again.', variant: 'destructive' });
+        setIsLoading(false);
+        return;
+    }
+
     if (!file) {
         toast({ title: 'Media file is required.', variant: 'destructive' });
         setIsLoading(false);
@@ -105,7 +111,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
         },
         (error) => {
             console.error("Upload failed:", error);
-            toast({ title: "Upload Failed", description: "Could not upload media file.", variant: "destructive" });
+            toast({ title: "Upload Failed", description: "Could not upload media file. Check console for details.", variant: "destructive" });
             setIsLoading(false);
             setUploadProgress(null);
         },
