@@ -111,7 +111,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               ) : project.mediaType === 'video' ? (
                  <>
                   <Image
-                    src="https://placehold.co/600x400.png"
+                    src={project.thumbnailUrl || "https://placehold.co/600x400.png"}
                     alt={`${project.title} video thumbnail`}
                     width={600}
                     height={400}

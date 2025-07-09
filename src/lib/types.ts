@@ -5,6 +5,7 @@ export type Project = {
   category: string;
   description: string;
   mediaUrl: string;
+  thumbnailUrl?: string; // Optional URL for video thumbnails
   mediaHint: string;
   mediaType: 'image' | 'video' | 'audio';
   skills: string[];
