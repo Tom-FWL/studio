@@ -44,7 +44,7 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
 
     setIsLoading(true);
 
-    const storageRef = ref(storage, `settings/profile-avatar`);
+    const storageRef = ref(storage, `media/profile-avatar`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on('state_changed',
