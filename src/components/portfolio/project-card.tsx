@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
-import { ArrowRight, Mail, Heart, Music } from 'lucide-react';
+import { ArrowRight, Mail, Heart, Music, Video } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -109,17 +109,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
               ) : project.mediaType === 'video' ? (
-                <video
-                  key={project.mediaUrl}
-                  src={project.mediaUrl}
-                  width={600}
-                  height={400}
-                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
+                 <>
+                  <Image
+                    src="https://placehold.co/600x400.png"
+                    alt={`${project.title} video thumbnail`}
+                    width={600}
+                    height={400}
+                    data-ai-hint="video play button"
+                    className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <Video className="h-16 w-16 text-white/80" />
+                  </div>
+                </>
               ) : (
                  <>
                   <Image
