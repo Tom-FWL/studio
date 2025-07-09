@@ -1,19 +1,33 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Project } from '@/lib/types';
 import { ProjectsTable } from '@/components/admin/projects-table';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Shield, LogOut } from 'lucide-react';
+import { PlusCircle, Shield, LogOut, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddProjectForm } from '@/components/admin/add-project-form';
 import { useAuth } from '@/context/auth-context';
+import { AvatarUploadForm } from './avatar-upload-form';
+import { getProfileSettings } from '@/lib/settings-service';
 
 export function DashboardClient({ projects: initialProjects }: { projects: Project[] }) {
   const [isAddProjectOpen, setAddProjectOpen] = useState(false);
-  const { logout } = useAuth();
+  const [isAvatarUploadOpen, setAvatarUploadOpen] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState<string | undefined>();
+  const { logout, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      getProfileSettings().then(settings => {
+        if (settings.avatarUrl) {
+          setCurrentAvatar(settings.avatarUrl);
+        }
+      });
+    }
+  }, [user, isAvatarUploadOpen]);
 
   return (
     <div className="min-h-screen bg-muted/20">
@@ -23,10 +37,24 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
             <Shield className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">Admin Panel</span>
           </Link>
-          <Button variant="ghost" onClick={logout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <Dialog open={isAvatarUploadOpen} onOpenChange={setAvatarUploadOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <UserCircle className="mr-2 h-4 w-4" />
+                  Update Avatar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md p-0">
+                <AvatarUploadForm currentAvatar={currentAvatar} setDialogOpen={setAvatarUploadOpen} />
+              </DialogContent>
+            </Dialog>
+
+            <Button variant="ghost" onClick={logout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">

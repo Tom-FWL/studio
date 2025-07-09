@@ -2,15 +2,31 @@
 'use client';
 
 import Image from "next/image";
-import { Award, Lightbulb, Heart } from "lucide-react";
+import { Award, Lightbulb, Heart, User } from "lucide-react";
 import { motion } from 'framer-motion';
 import { AnimatedText } from "@/components/animated-text";
 import { useState, useEffect } from 'react';
+import { getProfileSettings } from "@/lib/settings-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AboutPage() {
   const [initialState, setInitialState] = useState("hidden");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch avatar URL from settings
+    getProfileSettings()
+      .then(settings => {
+        if (settings.avatarUrl) {
+          setAvatarUrl(settings.avatarUrl);
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        setIsAvatarLoading(false);
+      });
+
     try {
       const animationKey = 'tommys-desk-about-animation';
       const animationData = localStorage.getItem(animationKey);
@@ -31,7 +47,7 @@ export default function AboutPage() {
         localStorage.setItem(animationKey, JSON.stringify({ lastSeen: Date.now() }));
         setInitialState("hidden");
       }
-    } catch (error) {
+    } catch (error) => {
       console.error("Could not access localStorage. Defaulting to play animation once per page load.", error);
       // Fallback for SSR or if localStorage is disabled. The animation will play.
       setInitialState("hidden");
@@ -119,16 +135,24 @@ export default function AboutPage() {
             variants={introColumnContainer}
           >
             <motion.div 
-              className="relative w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden shadow-lg mb-6"
+              className="relative w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden shadow-lg mb-6 bg-muted"
               variants={fadeInUp}
             >
-              <Image
-                src="https://storage.googleapis.com/gweb-aip-static/app-protopyer-images/89f2a033-68d7-4632-a634-1c09b673235b.jpeg"
-                alt="Portrait of the creator"
-                layout="fill"
-                objectFit="cover"
-                data-ai-hint="professional portrait"
-              />
+              {isAvatarLoading ? (
+                <Skeleton className="w-full h-full rounded-full" />
+              ) : avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt="Portrait of the creator"
+                  layout="fill"
+                  objectFit="cover"
+                  data-ai-hint="professional portrait"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-1/2 h-1/2 text-muted-foreground" />
+                </div>
+              )}
             </motion.div>
             <motion.h1 
               className="text-4xl font-headline text-primary"
