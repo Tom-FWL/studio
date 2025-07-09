@@ -22,8 +22,8 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
   useEffect(() => {
     if (user) {
       getProfileSettings().then(settings => {
-        if (settings.avatarUrl) {
-          setCurrentAvatar(settings.avatarUrl);
+        if (settings.url) {
+          setCurrentAvatar(settings.url);
         }
       });
     }

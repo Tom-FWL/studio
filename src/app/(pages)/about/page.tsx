@@ -18,8 +18,8 @@ export default function AboutPage() {
     // Fetch avatar URL from settings
     getProfileSettings()
       .then(settings => {
-        if (settings.avatarUrl) {
-          setAvatarUrl(settings.avatarUrl);
+        if (settings.url) {
+          setAvatarUrl(settings.url);
         }
       })
       .catch(console.error)
