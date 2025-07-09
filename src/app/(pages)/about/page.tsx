@@ -123,7 +123,7 @@ export default function AboutPage() {
               variants={fadeInUp}
             >
               <Image
-                src="https://placehold.co/400x400.png"
+                src="https://storage.googleapis.com/gweb-aip-static/app-protopyer-images/8a156499-562a-41f1-a831-e405a2f5581e.jpeg"
                 alt="Portrait of the creator"
                 layout="fill"
                 objectFit="cover"
