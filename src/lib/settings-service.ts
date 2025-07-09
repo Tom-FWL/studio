@@ -1,11 +1,10 @@
-
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
-export const SETTINGS_COLLECTION = 'settings';
-const AVATAR_SETTINGS_DOC = 'avatar'; // Changed from 'profile' to 'avatar'
+export const SETTINGS_COLLECTION = 'media';
+export const AVATAR_SETTINGS_DOC = 'avatar';
 
-// The settings structure is now specifically for the avatar URL.
+// The settings structure is for the avatar URL, stored within the media collection.
 type AvatarSettings = {
     url?: string;
     updatedAt?: any;
