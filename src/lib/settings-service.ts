@@ -2,7 +2,7 @@
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
-const SETTINGS_COLLECTION = 'settings';
+const SETTINGS_COLLECTION = 'site-settings';
 const PROFILE_SETTINGS_DOC = 'profile';
 
 type ProfileSettings = {
