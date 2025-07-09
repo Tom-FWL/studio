@@ -166,12 +166,10 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
         if (file.type.startsWith('video/')) mediaType = 'video';
         else if (file.type.startsWith('audio/')) mediaType = 'audio';
 
-        const newProjectData = {
+        const newProjectData: any = {
           ...validationResult.data,
           skills: validationResult.data.skills.split(",").map(s => s.trim()),
           mediaUrl: mainMediaUrl,
-          thumbnailUrl,
-          pdfUrl,
           mediaType,
           mediaHint: validationResult.data.mediaHint || 'new project',
           details: {
@@ -180,8 +178,16 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
             outcome: validationResult.data.outcome,
           }
         };
+        
+        if (thumbnailUrl) {
+          newProjectData.thumbnailUrl = thumbnailUrl;
+        }
 
-        await addProject(newProjectData as any);
+        if (pdfUrl) {
+          newProjectData.pdfUrl = pdfUrl;
+        }
+
+        await addProject(newProjectData);
         
         toast({ title: 'Project Added', description: 'The new project has been added successfully.' });
         resetForm();
@@ -252,6 +258,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                         {thumbnailPreview && (
                             <div className="mt-2 rounded-md border p-2 bg-muted/50">
                                 <p className="text-sm text-muted-foreground mb-2">Thumbnail Preview:</p>
+
                                 <img src={thumbnailPreview} alt="Thumbnail preview" className="rounded-md object-cover w-full h-auto max-h-48" />
                             </div>
                         )}
@@ -315,3 +322,5 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     </>
   );
 }
+
+    
