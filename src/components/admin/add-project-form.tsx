@@ -45,6 +45,10 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState<number | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const result = projectSchema.safeParse(formData);
@@ -56,6 +60,18 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
         setMediaPreview(URL.createObjectURL(selectedFile));
+        if (!selectedFile.type.startsWith('video/')) {
+            setThumbnailFile(null);
+            setThumbnailPreview(null);
+        }
+    }
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        setThumbnailFile(selectedFile);
+        setThumbnailPreview(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -64,6 +80,9 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     setFile(null);
     setMediaPreview(null);
     setUploadProgress(null);
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+    setThumbnailUploadProgress(null);
     formRef.current?.reset();
   };
 
@@ -72,12 +91,34 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const uploadFile = (fileToUpload: File, path: string, setProgress: (p: number | null) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(progress);
+        },
+        (error) => {
+          setProgress(null);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setProgress(null);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (!auth.currentUser) {
-        toast({ title: 'Authentication Error', description: 'You must be logged in to upload files. Please log out and log in again.', variant: 'destructive' });
+        toast({ title: 'Authentication Error', description: 'You must be logged in to upload files.', variant: 'destructive' });
         setIsLoading(false);
         return;
     }
@@ -90,68 +131,53 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
 
     const validationResult = projectSchema.safeParse(formData);
     if (!validationResult.success) {
-      toast({
-        title: 'Invalid Form Data',
-        description: 'Please fill out all required fields correctly.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Invalid Form Data', description: 'Please fill out all required fields correctly.', variant: 'destructive' });
       setIsLoading(false);
       return;
     }
     
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    const storageRef = ref(storage, `media/${fileName}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on('state_changed',
-        (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadProgress(progress);
-        },
-        (error) => {
-            console.error("Upload failed:", error);
-            toast({ title: "Upload Failed", description: "Could not upload media file. Check console for details.", variant: "destructive" });
-            setIsLoading(false);
-            setUploadProgress(null);
-        },
-        async () => {
-            try {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                
-                let mediaType: 'image' | 'video' | 'audio' = 'image';
-                if (file.type.startsWith('video/')) mediaType = 'video';
-                else if (file.type.startsWith('audio/')) mediaType = 'audio';
-
-                const newProjectData = {
-                  ...validationResult.data,
-                  skills: validationResult.data.skills.split(",").map(s => s.trim()),
-                  mediaUrl: downloadURL,
-                  mediaType,
-                  mediaHint: validationResult.data.mediaHint || 'new project',
-                  details: {
-                    goal: validationResult.data.goal,
-                    process: validationResult.data.process,
-                    outcome: validationResult.data.outcome,
-                  }
-                };
-
-                await addProject(newProjectData as any);
-                
-                toast({ title: 'Project Added', description: 'The new project has been added successfully.' });
-                resetForm();
-                setDialogOpen(false);
-                router.refresh();
-
-            } catch (error) {
-                console.error("Failed to add project:", error);
-                toast({ title: 'Error Adding Project', description: 'Failed to add project to the database.', variant: 'destructive' });
-            } finally {
-                setIsLoading(false);
-                setUploadProgress(null);
-            }
+    try {
+        const projectUuid = uuidv4();
+        const mainMediaUrl = await uploadFile(file, `media/${projectUuid}/${file.name}`, setUploadProgress);
+        
+        let thumbnailUrl: string | undefined = undefined;
+        if (thumbnailFile) {
+            thumbnailUrl = await uploadFile(thumbnailFile, `media/${projectUuid}/${thumbnailFile.name}`, setThumbnailUploadProgress);
         }
-    );
+
+        let mediaType: 'image' | 'video' | 'audio' = 'image';
+        if (file.type.startsWith('video/')) mediaType = 'video';
+        else if (file.type.startsWith('audio/')) mediaType = 'audio';
+
+        const newProjectData = {
+          ...validationResult.data,
+          skills: validationResult.data.skills.split(",").map(s => s.trim()),
+          mediaUrl: mainMediaUrl,
+          thumbnailUrl,
+          mediaType,
+          mediaHint: validationResult.data.mediaHint || 'new project',
+          details: {
+            goal: validationResult.data.goal,
+            process: validationResult.data.process,
+            outcome: validationResult.data.outcome,
+          }
+        };
+
+        await addProject(newProjectData as any);
+        
+        toast({ title: 'Project Added', description: 'The new project has been added successfully.' });
+        resetForm();
+        setDialogOpen(false);
+        router.refresh();
+
+    } catch (error) {
+        console.error("Failed to add project:", error);
+        let description = 'An unknown error occurred.';
+        if (error instanceof Error) description = error.message;
+        toast({ title: 'Error Adding Project', description, variant: 'destructive' });
+    } finally {
+        setIsLoading(false);
+    }
   }
 
   return (
@@ -194,6 +220,25 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                         </div>
                     )}
                   </div>
+                   {file?.type.startsWith('video/') && (
+                    <div className="space-y-2 pt-2 border-t mt-4">
+                        <Label htmlFor="thumbnail">Thumbnail Image (Optional)</Label>
+                        <p className="text-xs text-muted-foreground">A static image preview for the main portfolio grid.</p>
+                        <Input id="thumbnail" name="thumbnail" type="file" accept="image/png, image/jpeg" onChange={handleThumbnailChange} />
+                        {thumbnailUploadProgress !== null && (
+                            <div className="mt-2 space-y-1">
+                                <Label className='text-xs'>Thumbnail Upload Progress</Label>
+                                <Progress value={thumbnailUploadProgress} />
+                            </div>
+                        )}
+                        {thumbnailPreview && (
+                            <div className="mt-2 rounded-md border p-2 bg-muted/50">
+                                <p className="text-sm text-muted-foreground mb-2">Thumbnail Preview:</p>
+                                <img src={thumbnailPreview} alt="Thumbnail preview" className="rounded-md object-cover w-full h-auto max-h-48" />
+                            </div>
+                        )}
+                    </div>
+                  )}
                   <div className="space-y-2">
                       <Label htmlFor="mediaHint">Image Description (for AI &amp; SEO)</Label>
                       <Input id="mediaHint" name="mediaHint" value={formData.mediaHint} onChange={handleChange} placeholder="e.g., elegant flowers on a desk" />
@@ -223,7 +268,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {uploadProgress !== null ? `Uploading... ${Math.round(uploadProgress)}%` : 'Processing...'}
+                    {uploadProgress !== null || thumbnailUploadProgress !== null ? `Uploading...` : 'Processing...'}
                   </>
                 ) : (
                   <>

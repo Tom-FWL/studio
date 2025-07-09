@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import type { Project } from '@/lib/types';
 import { updateProject } from '@/lib/project-service';
 import { Button } from '@/components/ui/button';
@@ -56,14 +56,32 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [mediaPreview, setMediaPreview] = useState<string | null>(project.mediaUrl);
   const [mediaTypePreview, setMediaTypePreview] = useState(project.mediaType);
 
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState<number | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(project.thumbnailUrl || null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
       setMediaPreview(URL.createObjectURL(selectedFile));
-      if (selectedFile.type.startsWith('video/')) setMediaTypePreview('video');
-      else if (selectedFile.type.startsWith('audio/')) setMediaTypePreview('audio');
-      else setMediaTypePreview('image');
+      if (selectedFile.type.startsWith('video/')) {
+        setMediaTypePreview('video');
+      } else if (selectedFile.type.startsWith('audio/')) {
+        setMediaTypePreview('audio');
+      } else {
+        setMediaTypePreview('image');
+        setThumbnailFile(null);
+        setThumbnailPreview(null);
+      }
+    }
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setThumbnailFile(selectedFile);
+      setThumbnailPreview(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -71,24 +89,42 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+  
+  const uploadFile = (fileToUpload: File, path: string, setProgress: (p: number | null) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(progress);
+        },
+        (error) => {
+          setProgress(null);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setProgress(null);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (!auth.currentUser) {
-      toast({ title: 'Authentication Error', description: 'You must be logged in to upload files. Please log out and log in again.', variant: 'destructive' });
+      toast({ title: 'Authentication Error', description: 'You must be logged in to upload files.', variant: 'destructive' });
       setIsLoading(false);
       return;
     }
 
     const result = editSchema.safeParse(formData);
     if (!result.success) {
-      toast({
-        title: 'Invalid Form Data',
-        description: result.error.issues.map(i => i.message).join(', '),
-        variant: 'destructive',
-      });
+      toast({ title: 'Invalid Form Data', description: result.error.issues.map(i => i.message).join(', '), variant: 'destructive' });
       setIsLoading(false);
       return;
     }
@@ -104,48 +140,27 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
       details: { goal, process, outcome },
     };
 
-    const performUpdate = async (finalUpdateData: Partial<Project>) => {
-      try {
-        await updateProject(project.id, finalUpdateData);
+    try {
+        if (file) {
+            const mediaUrl = await uploadFile(file, `media/${project.id}/${file.name}`, setUploadProgress);
+            projectUpdateData.mediaUrl = mediaUrl;
+            projectUpdateData.mediaType = mediaTypePreview;
+        }
+
+        if (thumbnailFile) {
+            const thumbnailUrl = await uploadFile(thumbnailFile, `media/${project.id}/${thumbnailFile.name}`, setThumbnailUploadProgress);
+            projectUpdateData.thumbnailUrl = thumbnailUrl;
+        }
+
+        await updateProject(project.id, projectUpdateData);
         toast({ title: 'Project Saved!', description: 'Your changes have been successfully saved.' });
         router.refresh();
         router.push('/admin/dashboard');
-      } catch (error) {
+    } catch (error) {
         console.error("Failed to update project:", error);
         toast({ title: 'Error Saving Project', description: 'Failed to save project. Please try again.', variant: 'destructive' });
-      } finally {
+    } finally {
         setIsLoading(false);
-        setUploadProgress(null);
-      }
-    };
-
-    if (file) {
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExtension}`;
-      const storageRef = ref(storage, `media/${project.id}/${fileName}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error("Upload failed:", error);
-          toast({ title: "Upload Failed", description: "Could not upload new media file. Check console for details.", variant: "destructive" });
-          setIsLoading(false);
-          setUploadProgress(null);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          projectUpdateData.mediaUrl = downloadURL;
-          projectUpdateData.mediaType = mediaTypePreview;
-          
-          await performUpdate(projectUpdateData);
-        }
-      );
-    } else {
-      await performUpdate(projectUpdateData);
     }
   }
 
@@ -198,6 +213,27 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                       </div>
                     )}
               </div>
+              {mediaTypePreview === 'video' && (
+                <div className="space-y-2 pt-2 border-t mt-4">
+                  <Label htmlFor="thumbnail">Thumbnail Image (Optional)</Label>
+                  <p className="text-xs text-muted-foreground">A static image to show on the portfolio grid instead of the video.</p>
+                  
+                  {thumbnailPreview && (
+                       <div className="mt-2 rounded-md border p-2 bg-muted/50">
+                          <p className="text-sm text-muted-foreground mb-2">Thumbnail Preview:</p>
+                          <img src={thumbnailPreview} alt="Thumbnail preview" className="rounded-md object-cover w-full h-auto max-h-48" />
+                      </div>
+                  )}
+
+                  <Input id="thumbnail" name="thumbnail" type="file" accept="image/png, image/jpeg" onChange={handleThumbnailChange} />
+                  {thumbnailUploadProgress !== null && (
+                      <div className="mt-2 space-y-1">
+                          <Label className='text-xs'>Thumbnail Upload Progress</Label>
+                          <Progress value={thumbnailUploadProgress} />
+                      </div>
+                  )}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="mediaHint">Media AI Hint</Label>
                 <Input id="mediaHint" name="mediaHint" value={formData.mediaHint} onChange={handleChange} />
@@ -226,7 +262,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                 {isLoading ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {uploadProgress !== null ? `Uploading... ${Math.round(uploadProgress)}%` : 'Saving...'}
+                        {uploadProgress !== null || thumbnailUploadProgress !== null ? 'Uploading...' : 'Saving...'}
                     </>
                 ) : (
                     <>
