@@ -123,7 +123,7 @@ export default function AboutPage() {
               variants={fadeInUp}
             >
               <Image
-                src="https://storage.googleapis.com/gweb-aip-static/app-protopyer-images/8a156499-562a-41f1-a831-e405a2f5581e.jpeg"
+                src="https://storage.googleapis.com/gweb-aip-static/app-protopyer-images/89f2a033-68d7-4632-a634-1c09b673235b.jpeg"
                 alt="Portrait of the creator"
                 layout="fill"
                 objectFit="cover"
