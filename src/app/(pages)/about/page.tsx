@@ -47,7 +47,7 @@ export default function AboutPage() {
         localStorage.setItem(animationKey, JSON.stringify({ lastSeen: Date.now() }));
         setInitialState("hidden");
       }
-    } catch (error) => {
+    } catch (error) {
       console.error("Could not access localStorage. Defaulting to play animation once per page load.", error);
       // Fallback for SSR or if localStorage is disabled. The animation will play.
       setInitialState("hidden");
