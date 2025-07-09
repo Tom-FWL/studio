@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, type FormEvent } from 'react';
@@ -44,7 +43,7 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
 
     setIsLoading(true);
 
-    const storageRef = ref(storage, 'settings/profile-avatar');
+    const storageRef = ref(storage, `settings/profile-avatar`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on('state_changed',
@@ -66,8 +65,14 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
           setDialogOpen(false);
           router.refresh();
         } catch (error) {
-          console.error("Failed to update avatar:", error);
-          toast({ title: 'Error Saving Avatar', description: 'The avatar was uploaded but could not be saved.', variant: 'destructive' });
+          console.error("Failed to update avatar settings in Firestore:", error);
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+          toast({
+            title: 'Error Saving Avatar',
+            description: `Upload succeeded, but saving the URL failed. Reason: ${errorMessage}`,
+            variant: 'destructive',
+            duration: 10000,
+          });
         } finally {
           setIsLoading(false);
           setUploadProgress(null);
