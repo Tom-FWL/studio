@@ -54,12 +54,16 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(project.mediaUrl);
+  const [mediaTypePreview, setMediaTypePreview] = useState(project.mediaType);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
       setMediaPreview(URL.createObjectURL(selectedFile));
+      if (selectedFile.type.startsWith('video/')) setMediaTypePreview('video');
+      else if (selectedFile.type.startsWith('audio/')) setMediaTypePreview('audio');
+      else setMediaTypePreview('image');
     }
   };
 
@@ -129,9 +133,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           projectUpdateData.mediaUrl = downloadURL;
-          if (file.type.startsWith('video/')) projectUpdateData.mediaType = 'video';
-          else if (file.type.startsWith('audio/')) projectUpdateData.mediaType = 'audio';
-          else projectUpdateData.mediaType = 'image';
+          projectUpdateData.mediaType = mediaTypePreview;
           
           await performUpdate(projectUpdateData);
         }
@@ -168,9 +170,9 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                 <div className="rounded-md border p-2 bg-muted/50">
                     {mediaPreview && (
                       <>
-                        {project.mediaType === 'image' && <img src={mediaPreview} alt="Media preview" className="rounded-md object-cover w-full h-auto max-h-48" />}
-                        {project.mediaType === 'video' && <video src={mediaPreview} controls className="rounded-md w-full h-auto max-h-48" />}
-                        {project.mediaType === 'audio' && (
+                        {mediaTypePreview === 'image' && <img src={mediaPreview} alt="Media preview" className="rounded-md object-cover w-full h-auto max-h-48" />}
+                        {mediaTypePreview === 'video' && <video src={mediaPreview} controls className="rounded-md w-full h-auto max-h-48" />}
+                        {mediaTypePreview === 'audio' && (
                            <div className="flex items-center gap-4 p-2">
                             <Music className="h-8 w-8 text-muted-foreground" />
                             <audio src={mediaPreview} controls className="w-full" />

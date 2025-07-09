@@ -130,7 +130,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                   }
                 };
 
-                await addProject(newProjectData as any); // Cast because details are nested
+                await addProject(newProjectData as any);
                 
                 toast({ title: 'Project Added', description: 'The new project has been added successfully.' });
                 resetForm();
