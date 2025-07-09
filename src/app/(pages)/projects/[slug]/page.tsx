@@ -3,7 +3,7 @@ import type { Project } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Music } from 'lucide-react';
+import { ArrowLeft, Music, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -104,6 +104,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </div>
       </div>
+      
+      {project.pdfUrl && (
+        <div className="mt-16 text-center">
+          <Button asChild size="lg">
+            <a href={project.pdfUrl} target="_blank" rel="noopener noreferrer" download>
+              <FileDown className="mr-2 h-5 w-5" />
+              Download Full Case Study
+            </a>
+          </Button>
+        </div>
+      )}
+
     </article>
   );
 }

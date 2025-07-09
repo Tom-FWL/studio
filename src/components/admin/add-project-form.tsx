@@ -50,6 +50,9 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
   const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState<number | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUploadProgress, setPdfUploadProgress] = useState<number | null>(null);
+
   useEffect(() => {
     const result = projectSchema.safeParse(formData);
     setIsFormValid(result.success && file !== null);
@@ -75,6 +78,13 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     }
   };
 
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        setPdfFile(selectedFile);
+    }
+  };
+
   const resetForm = () => {
     setFormData(initialFormData);
     setFile(null);
@@ -83,6 +93,8 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
     setThumbnailFile(null);
     setThumbnailPreview(null);
     setThumbnailUploadProgress(null);
+    setPdfFile(null);
+    setPdfUploadProgress(null);
     formRef.current?.reset();
   };
 
@@ -145,6 +157,11 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
             thumbnailUrl = await uploadFile(thumbnailFile, `media/${projectUuid}/${thumbnailFile.name}`, setThumbnailUploadProgress);
         }
 
+        let pdfUrl: string | undefined = undefined;
+        if (pdfFile) {
+            pdfUrl = await uploadFile(pdfFile, `media/${projectUuid}/pdfs/${pdfFile.name}`, setPdfUploadProgress);
+        }
+
         let mediaType: 'image' | 'video' | 'audio' = 'image';
         if (file.type.startsWith('video/')) mediaType = 'video';
         else if (file.type.startsWith('audio/')) mediaType = 'audio';
@@ -154,6 +171,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
           skills: validationResult.data.skills.split(",").map(s => s.trim()),
           mediaUrl: mainMediaUrl,
           thumbnailUrl,
+          pdfUrl,
           mediaType,
           mediaHint: validationResult.data.mediaHint || 'new project',
           details: {
@@ -244,6 +262,22 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                       <Input id="mediaHint" name="mediaHint" value={formData.mediaHint} onChange={handleChange} placeholder="e.g., elegant flowers on a desk" />
                       <p className="text-xs text-muted-foreground">Describe the image for search engines and AI image tools.</p>
                   </div>
+                   <div className="space-y-2 pt-2 border-t mt-4">
+                        <Label htmlFor="pdf">Supporting PDF (Optional)</Label>
+                        <p className="text-xs text-muted-foreground">Upload a case study or supporting document.</p>
+                        <Input id="pdf" name="pdf" type="file" accept="application/pdf" onChange={handlePdfFileChange} />
+                        {pdfUploadProgress !== null && (
+                            <div className="mt-2 space-y-1">
+                                <Label className='text-xs'>PDF Upload Progress</Label>
+                                <Progress value={pdfUploadProgress} />
+                            </div>
+                        )}
+                        {pdfFile && (
+                            <div className="mt-2 rounded-md border p-2 bg-muted/50">
+                                <p className="text-sm text-muted-foreground">Selected PDF: {pdfFile.name}</p>
+                            </div>
+                        )}
+                    </div>
                   <div className="space-y-2">
                       <Label htmlFor="description">Short Description *</Label>
                       <Textarea id="description" name="description" value={formData.description} onChange={handleChange} className="min-h-[60px]" placeholder="A brief, one-sentence summary of the project." required />
@@ -268,7 +302,7 @@ export function AddProjectForm({ setDialogOpen }: { setDialogOpen: (open: boolea
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {uploadProgress !== null || thumbnailUploadProgress !== null ? `Uploading...` : 'Processing...'}
+                    {uploadProgress !== null || thumbnailUploadProgress !== null || pdfUploadProgress !== null ? `Uploading...` : 'Processing...'}
                   </>
                 ) : (
                   <>

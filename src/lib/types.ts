@@ -6,6 +6,7 @@ export type Project = {
   description: string;
   mediaUrl: string;
   thumbnailUrl?: string; // Optional URL for video thumbnails
+  pdfUrl?: string;
   mediaHint: string;
   mediaType: 'image' | 'video' | 'audio';
   skills: string[];

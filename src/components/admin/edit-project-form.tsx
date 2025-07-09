@@ -60,6 +60,9 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
   const [thumbnailUploadProgress, setThumbnailUploadProgress] = useState<number | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(project.thumbnailUrl || null);
 
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUploadProgress, setPdfUploadProgress] = useState<number | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -82,6 +85,13 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
       const selectedFile = e.target.files[0];
       setThumbnailFile(selectedFile);
       setThumbnailPreview(URL.createObjectURL(selectedFile));
+    }
+  };
+  
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        setPdfFile(selectedFile);
     }
   };
 
@@ -150,6 +160,11 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
         if (thumbnailFile) {
             const thumbnailUrl = await uploadFile(thumbnailFile, `media/${project.id}/${thumbnailFile.name}`, setThumbnailUploadProgress);
             projectUpdateData.thumbnailUrl = thumbnailUrl;
+        }
+        
+        if (pdfFile) {
+            const pdfUrl = await uploadFile(pdfFile, `media/${project.id}/pdfs/${pdfFile.name}`, setPdfUploadProgress);
+            projectUpdateData.pdfUrl = pdfUrl;
         }
 
         await updateProject(project.id, projectUpdateData);
@@ -234,6 +249,27 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                   )}
                 </div>
               )}
+               <div className="space-y-2 pt-2 border-t mt-4">
+                <Label htmlFor="pdf">Supporting PDF (Optional)</Label>
+                {project.pdfUrl && !pdfFile && (
+                    <div className="text-sm text-muted-foreground">
+                        Current PDF: <a href={project.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">{decodeURIComponent(project.pdfUrl.split('/').pop()?.split('?')[0] || '')}</a>
+                    </div>
+                )}
+                <p className="text-xs text-muted-foreground">{project.pdfUrl ? 'Upload a new file to replace the current one.' : 'Upload a case study or supporting document.'}</p>
+                <Input id="pdf" name="pdf" type="file" accept="application/pdf" onChange={handlePdfFileChange} />
+                {pdfUploadProgress !== null && (
+                    <div className="mt-2 space-y-1">
+                        <Label className='text-xs'>PDF Upload Progress</Label>
+                        <Progress value={pdfUploadProgress} />
+                    </div>
+                )}
+                {pdfFile && (
+                    <div className="mt-2 rounded-md border p-2 bg-muted/50">
+                        <p className="text-sm text-muted-foreground">New PDF: {pdfFile.name}</p>
+                    </div>
+                )}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="mediaHint">Media AI Hint</Label>
                 <Input id="mediaHint" name="mediaHint" value={formData.mediaHint} onChange={handleChange} />
@@ -262,7 +298,7 @@ export function EditProjectForm({ project }: EditProjectFormProps) {
                 {isLoading ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {uploadProgress !== null || thumbnailUploadProgress !== null ? 'Uploading...' : 'Saving...'}
+                        {uploadProgress !== null || thumbnailUploadProgress !== null || pdfUploadProgress !== null ? 'Uploading...' : 'Saving...'}
                     </>
                 ) : (
                     <>
