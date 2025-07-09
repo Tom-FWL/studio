@@ -66,7 +66,15 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
           router.refresh();
         } catch (error) {
           console.error("Failed to update avatar settings in Firestore:", error);
-          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+          let errorMessage = "An unknown error occurred.";
+          if (error instanceof Error) {
+            // Check for Firestore permission error
+            if (error.message.includes("Missing or insufficient permissions")) {
+              errorMessage = "Permission denied. Please check your Firestore security rules to allow writes to the 'settings' collection for authenticated users.";
+            } else {
+              errorMessage = error.message;
+            }
+          }
           toast({
             title: 'Error Saving Avatar',
             description: `Upload succeeded, but saving the URL failed. Reason: ${errorMessage}`,
