@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
-import { ArrowRight, Heart, Music, Video } from 'lucide-react';
+import { ArrowRight, Heart } from 'lucide-react';
 import { likeProject } from '@/lib/project-service';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -85,49 +85,31 @@ export function ProjectCard({ project }: ProjectCardProps) {
     </motion.button>
   );
 
+  let imageUrl = "https://placehold.co/600x400.png";
+  let imageHint = project.mediaHint;
+
+  if (project.mediaType === 'image') {
+    imageUrl = project.mediaUrl;
+  } else if (project.mediaType === 'video') {
+    imageUrl = project.thumbnailUrl || "https://placehold.co/600x400.png";
+    imageHint = "video project";
+  } else if (project.mediaType === 'audio') {
+    imageHint = "audio project";
+  }
+
   return (
     <Link href={`/projects/${project.slug}`} className="block h-full">
       <Card className="group h-full cursor-pointer overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <CardHeader className="p-0">
-          <div className="aspect-video overflow-hidden bg-black relative">
-            {project.mediaType === 'image' ? (
-              <Image
-                src={project.mediaUrl}
-                alt={project.title}
-                width={600}
-                height={400}
-                data-ai-hint={project.mediaHint}
-                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
-            ) : project.mediaType === 'video' ? (
-               <>
-                <Image
-                  src={project.thumbnailUrl || "https://placehold.co/600x400.png"}
-                  alt={`${project.title} video thumbnail`}
-                  width={600}
-                  height={400}
-                  data-ai-hint="video play button"
-                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <Video className="h-16 w-16 text-white/80" />
-                </div>
-              </>
-            ) : (
-               <>
-                <Image
-                  src="https://placehold.co/600x400.png"
-                  alt={project.title}
-                  width={600}
-                  height={400}
-                  data-ai-hint="music audio track"
-                  className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <Music className="h-16 w-16 text-white/80" />
-                </div>
-              </>
-            )}
+          <div className="aspect-video overflow-hidden bg-muted relative">
+            <Image
+              src={imageUrl}
+              alt={project.title}
+              width={600}
+              height={400}
+              data-ai-hint={imageHint}
+              className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
           </div>
         </CardHeader>
         <CardContent className="p-6">
