@@ -24,3 +24,24 @@ export async function deleteProject(id: string): Promise<{ message: string }> {
     return { message: 'Failed to delete project.' };
   }
 }
+
+const handleDelete = async (projectId: string) => {
+  const projectRef = doc(db, 'projects', projectId);
+  await updateDoc(projectRef, {
+    isDeleted: true,
+    deletedAt: serverTimestamp()
+  });
+  alert('Project moved to bin.');
+};
+
+const q = query(
+  collection(db, 'projects'),
+  where('isDeleted', '==', false)
+);
+
+const q = query(
+  collection(db, 'projects'),
+  where('isDeleted', '==', true),
+  orderBy('deletedAt', 'desc')
+);
+
