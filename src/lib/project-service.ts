@@ -1,5 +1,3 @@
-
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc, orderBy, serverTimestamp, Timestamp, increment } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from './types';
 

@@ -1,10 +1,5 @@
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
-export const SETTINGS_COLLECTION = 'media';
-export const AVATAR_SETTINGS_DOC = 'avatar';
-
-// The settings structure is for the avatar URL, stored within the media collection.
 type AvatarSettings = {
     url?: string;
     updatedAt?: any;
