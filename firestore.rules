@@ -1,12 +1,24 @@
-
 rules_version = '2';
 
-service cloud.firestore {
+service cloud.firestore
   match /databases/{database}/documents {
+  
+  function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(db)/documents/users/$(request.auth.uid))
+        && get(/databases/$(db)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+  
     // Projects can be read by anyone, but only modified by authenticated users.
     match /projects/{projectId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if resource.data.isDeleted != true;
+      allow read, update, delete, write: if request.auth != null;
+    }
+
+    // Allow authenticated users to write to media/avatar
+    match /media/avatar {
+       allow create, update, delete, read: if request.auth != null;
     }
 
     // Contact messages can be created by anyone, but only read by authenticated users.
@@ -15,4 +27,3 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null;
     }
   }
-}

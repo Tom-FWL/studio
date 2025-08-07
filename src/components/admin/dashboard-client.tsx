@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { Project } from '@/lib/types';
 import { ProjectsTable } from '@/components/admin/projects-table';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Shield, LogOut, UserCircle } from 'lucide-react';
+import { PlusCircle, Shield, LogOut, UserCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddProjectForm } from '@/components/admin/add-project-form';
@@ -38,6 +38,12 @@ export function DashboardClient({ projects: initialProjects }: { projects: Proje
             <span className="font-bold font-headline text-lg">Admin Panel</span>
           </Link>
           <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+                <Link href="/admin/bin">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Bin
+                </Link>
+            </Button>
             <Dialog open={isAvatarUploadOpen} onOpenChange={setAvatarUploadOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">

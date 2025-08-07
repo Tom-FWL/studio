@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Project } from "@/lib/types";
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
+import Image from 'next/image';
 import { Edit, Trash2, Video } from "lucide-react";
 import {
   AlertDialog,
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { deleteProject } from "@/lib/project-service";
+import { softDeleteProject } from "@/lib/project-service";
 import { useRouter } from "next/navigation";
 
 type ProjectsTableProps = {
@@ -37,19 +38,19 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleDeleteProject = async (id: string, title: string) => {
+  const handleSoftDelete = async (id: string, title: string) => {
     try {
-      await deleteProject(id);
+      await softDeleteProject(id);
       toast({
-        title: "Project Deleted",
-        description: `"${title}" has been permanently removed.`,
+        title: "Project Moved to Bin",
+        description: `"${title}" has been moved to the bin.`,
       });
       router.refresh();
     } catch (error) {
-      console.error("Failed to delete project:", error);
+      console.error("Failed to move project to bin:", error);
       toast({
-        title: "Error Deleting Project",
-        description: "Failed to delete project. Please try again.",
+        title: "Error",
+        description: "Failed to move project to bin. Please try again.",
         variant: "destructive",
       });
     }
@@ -71,10 +72,24 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell>
-                {project.mediaType === 'video' ? (
-                  <div className="flex h-12 w-16 items-center justify-center rounded-md bg-muted">
-                    <Video className="h-6 w-6 text-muted-foreground" />
+                 {project.mediaType === 'video' ? (
+                  <div className="w-16 h-12 flex items-center justify-center bg-muted rounded-md">
+                    {project.thumbnailUrl ? (
+                      <Image
+                        src={project.thumbnailUrl}
+                        alt={project.title}
+                        width={64}
+                        height={48}
+                        className="rounded-md object-cover w-16 h-12"
+                      />
+                    ) : (
+                      <Video className="h-6 w-6 text-muted-foreground" />
+                    )}
                   </div>
+                ) : project.mediaType === 'audio' ? (
+                   <div className="w-16 h-12 flex items-center justify-center bg-muted rounded-md">
+                      <Video className="h-6 w-6 text-muted-foreground" />
+                   </div>
                 ) : (
                   <Image
                     src={project.mediaUrl}
@@ -114,19 +129,18 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogTitle>Move this project to the bin?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the project
-                        &quot;{project.title}&quot;.
+                        This will move the project &quot;{project.title}&quot; to the bin. It will be permanently deleted after 30 days.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleDeleteProject(project.id, project.title)}
+                        onClick={() => handleSoftDelete(project.id, project.title)}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        Delete
+                        Move to Bin
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

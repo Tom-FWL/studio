@@ -17,4 +17,6 @@ export type Project = {
   };
   createdAt?: string | null;
   likes?: number;
+  isDeleted: boolean;
+  deletedAt: string | null;
 };

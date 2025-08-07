@@ -3,6 +3,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { deleteProject as deleteProjectFromDb } from '@/lib/project-service';
+import { db } from "@/lib/firebase"; // adjust path accordingly
+import {
+  doc,
+  collection,
+  query,
+  where,
+  orderBy,
+  updateDoc,
+  serverTimestamp,
+  getDocs
+} from "firebase/firestore";
 
 // The 'onAddProject' server action has been removed and replaced with a client-side
 // handler in 'add-project-form.tsx' to correctly handle Firebase authentication.
@@ -33,11 +44,6 @@ const handleDelete = async (projectId: string) => {
   });
   alert('Project moved to bin.');
 };
-
-const q = query(
-  collection(db, 'projects'),
-  where('isDeleted', '==', false)
-);
 
 const q = query(
   collection(db, 'projects'),

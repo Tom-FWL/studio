@@ -17,17 +17,19 @@ function slugify(text: string) {
 // Helper to safely convert Firestore data to a serializable Project object
 function toSerializableProject(doc: any): Project {
     const data = doc.data();
-    return {
+    const project: Project = {
         id: doc.id,
         ...data,
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : null,
+        deletedAt: data.deletedAt instanceof Timestamp ? data.deletedAt.toDate().toISOString() : null,
         likes: data.likes || 0,
-    } as Project;
+    };
+    return project;
 }
 
 
 // Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'createdAt' | 'likes'>): Promise<Project> {
+export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'createdAt' | 'likes' | 'isDeleted' | 'deletedAt'>): Promise<Project> {
   let slug = slugify(projectData.title);
   
   // Ensure slug is unique
@@ -37,11 +39,13 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'cre
     slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
   }
 
-  const newProjectData = {
+  const newProjectData: Omit<Project, 'id'> = {
     ...projectData,
     slug,
     createdAt: serverTimestamp(),
     likes: 0,
+    isDeleted: false,
+    deletedAt: null,
   };
 
   const docRef = await addDoc(collection(db, 'projects'), newProjectData);
@@ -49,16 +53,26 @@ export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'cre
   return {
     ...newProjectData,
     id: docRef.id,
+    createdAt: new Date().toISOString(),
   } as Project;
 }
 
-// Fetch all projects from Firestore
+// Fetch all non-deleted projects from Firestore
 export async function getProjects(): Promise<Project[]> {
   const projectsCol = collection(db, 'projects');
-  const q = query(projectsCol, orderBy('createdAt', 'desc'));
+  const q = query(projectsCol, where('isDeleted', '==', false), orderBy('createdAt', 'desc'));
   const projectSnapshot = await getDocs(q);
   const projectList = projectSnapshot.docs.map(toSerializableProject);
   return projectList;
+}
+
+// Fetch all soft-deleted projects (in the bin)
+export async function getBinnedProjects(): Promise<Project[]> {
+    const projectsCol = collection(db, 'projects');
+    const q = query(projectsCol, where('isDeleted', '==', true), orderBy('deletedAt', 'desc'));
+    const projectSnapshot = await getDocs(q);
+    const projectList = projectSnapshot.docs.map(toSerializableProject);
+    return projectList;
 }
 
 // Fetch a single project by its slug
@@ -96,7 +110,25 @@ export async function likeProject(id: string): Promise<void> {
   });
 }
 
-// Delete a project from Firestore
+// Soft delete a project (move to bin)
+export async function softDeleteProject(id: string): Promise<void> {
+    const projectDoc = doc(db, 'projects', id);
+    await updateDoc(projectDoc, {
+        isDeleted: true,
+        deletedAt: serverTimestamp(),
+    });
+}
+
+// Restore a project from the bin
+export async function restoreProject(id: string): Promise<void> {
+    const projectDoc = doc(db, 'projects', id);
+    await updateDoc(projectDoc, {
+        isDeleted: false,
+        deletedAt: null,
+    });
+}
+
+// Permanently delete a project from Firestore
 export async function deleteProject(id: string): Promise<void> {
   const projectDoc = doc(db, 'projects', id);
   await deleteDoc(projectDoc);
