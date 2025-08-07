@@ -8,3 +8,8 @@ const nextConfig = {
   
   module.exports = nextConfig;
   
+  module.exports = {
+    // other config...
+    matcher: ['/admin/:path*'],
+  };
+  

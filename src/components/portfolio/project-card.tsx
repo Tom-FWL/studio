@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/lib/types';
 import { ArrowRight, Heart } from 'lucide-react';
-import { likeProject } from '@/lib/project-service';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { toggleLikeProject, getProjectLikeCount } from '@/lib/project-service';
+
 
 type ProjectCardProps = {
   project: Project;
@@ -20,20 +20,26 @@ type ProjectCardProps = {
 export function ProjectCard({ project }: ProjectCardProps) {
   const { toast } = useToast();
 
-  const [likes, setLikes] = useState(project.likes || 0);
+  const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
 
   useEffect(() => {
-    try {
-      const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
-      if (likedProjects.includes(project.id)) {
-        setIsLiked(true);
+    const initLikeState = async () => {
+      try {
+        const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
+        if (likedProjects.includes(project.id)) {
+          setIsLiked(true);
+        }
+
+        const count = await getProjectLikeCount(project.id);
+        setLikes(count);
+      } catch (error) {
+        console.error("Error initializing like state:", error);
       }
-    } catch (error) {
-      console.error("Could not parse liked projects from localStorage", error);
-      localStorage.setItem('likedProjects', '[]');
-    }
+    };
+
+    initLikeState();
   }, [project.id]);
 
   const handleLike = async (e: React.MouseEvent) => {
@@ -42,16 +48,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
     if (isLiked || isProcessingLike) return;
 
     setIsProcessingLike(true);
-    
+
     try {
-      await likeProject(project.id);
-      
+      await toggleLikeProject(project.id);
+
       const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]');
       localStorage.setItem('likedProjects', JSON.stringify([...likedProjects, project.id]));
-      
-      setLikes(prevLikes => prevLikes + 1);
+
+      const newCount = await getProjectLikeCount(project.id);
+      setLikes(newCount);
       setIsLiked(true);
-      
+
       toast({
         title: "Thanks for liking!",
         description: `You've shown your appreciation for "${project.title}".`,
@@ -80,7 +87,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       )}
       aria-label="Like project"
     >
-      <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
+      <Heart className={cn("h-4 w-4", isLiked && "fill-current")}/>
       <span>{likes}</span>
     </motion.button>
   );

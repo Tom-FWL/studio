@@ -12,6 +12,7 @@ import { AddProjectForm } from '@/components/admin/add-project-form';
 import { useAuth } from '@/context/auth-context';
 import { AvatarUploadForm } from './avatar-upload-form';
 import { getProfileSettings } from '@/lib/settings-service';
+import { signInWithGoogle } from '@/lib/firebase';
 
 export function DashboardClient({ projects: initialProjects }: { projects: Project[] }) {
   const [isAddProjectOpen, setAddProjectOpen] = useState(false);

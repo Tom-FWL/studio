@@ -12,7 +12,7 @@ import { storage, auth } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
-import { updateProfileSettings, SETTINGS_COLLECTION, AVATAR_SETTINGS_DOC } from '@/lib/settings-service';
+import { updateProfileSettings } from '@/lib/settings-service';
 import { useRouter } from 'next/navigation';
 
 export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvatar?: string; setDialogOpen: (open: boolean) => void }) {
@@ -44,7 +44,8 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
 
     setIsLoading(true);
 
-    const storageRef = ref(storage, `media/profile-avatar`);
+    const uid = auth.currentUser.uid;
+    const storageRef = ref(storage, `media/${uid}/avatar.jpg`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on('state_changed',
@@ -71,7 +72,7 @@ export function AvatarUploadForm({ currentAvatar, setDialogOpen }: { currentAvat
           if (error instanceof Error) {
             // Check for Firestore permission error
             if (error.message.includes("Missing or insufficient permissions")) {
-              errorMessage = `Permission denied. Please check your Firestore security rules to allow writes to the '${SETTINGS_COLLECTION}/${AVATAR_SETTINGS_DOC}' document for authenticated users.`;
+              errorMessage = `Permission denied. Please check your Firestore security rules to allow writes to the document for authenticated users.`;
             } else {
               errorMessage = error.message;
             }

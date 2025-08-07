@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, signInWithGoogle } = useAuth(); // make sure it's exposed in context
   const router = useRouter();
   const { toast } = useToast();
 
@@ -42,6 +42,17 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      router.push("/admin/dashboard");
+    } catch (error) {
+      toast({
+        description: "Google sign-in failed.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/20">
@@ -80,9 +91,12 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-2">
             <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading ? "Authenticating..." : "Login"}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+              Sign in with Google
             </Button>
           </CardFooter>
         </form>

@@ -1,21 +1,34 @@
-import { db } from './firebase';
+import { db, auth } from './firebase';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 
 type AvatarSettings = {
-    url?: string;
-    updatedAt?: any;
+  url?: string;
+  updatedAt?: any;
 };
 
 export async function getProfileSettings(): Promise<AvatarSettings> {
-    const docRef = doc(db, SETTINGS_COLLECTION, AVATAR_SETTINGS_DOC);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        return docSnap.data() as AvatarSettings;
-    }
-    return {};
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+
+  const docRef = doc(db, 'users', user.uid, 'media', 'avatar');
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data() as AvatarSettings;
+  }
+
+  return {};
 }
 
 export async function updateProfileSettings(data: Partial<AvatarSettings>): Promise<void> {
-    const docRef = doc(db, SETTINGS_COLLECTION, AVATAR_SETTINGS_DOC);
-    // Using setDoc with merge to create or update the document.
-    await setDoc(docRef, { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+
+  const docRef = doc(db, 'users', user.uid, 'media', 'avatar');
+  await setDoc(docRef, { ...data, updatedAt: serverTimestamp() }, { merge: true });
 }

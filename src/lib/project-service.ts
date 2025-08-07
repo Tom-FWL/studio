@@ -1,141 +1,88 @@
-import { db } from './firebase';
-import type { Project } from './types';
+import { db, auth } from './firebase';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  collection,
+  setDoc,
+  addDoc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  updateDoc
+} from 'firebase/firestore';
 
-function slugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/[^\w-]+/g, '') // Remove all non-word chars
-    .replace(/--+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, ''); // Trim - from end of text
+// ---------- Project CRUD (scoped under user) ----------
+
+// Add new project
+export async function addProject(data: any) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+  const colRef = collection(db, 'users', user.uid, 'projects');
+  const docRef = await addDoc(colRef, data);
+  return docRef;
 }
 
-// Helper to safely convert Firestore data to a serializable Project object
-function toSerializableProject(doc: any): Project {
-    const data = doc.data();
-    const project: Project = {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : null,
-        deletedAt: data.deletedAt instanceof Timestamp ? data.deletedAt.toDate().toISOString() : null,
-        likes: data.likes || 0,
-    };
-    return project;
+// Get all projects for the current user
+export async function getProjects() {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+  const colRef = collection(db, 'users', user.uid, 'projects');
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
+// Delete a project
+export async function deleteProject(projectId: string) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+  const docRef = doc(db, 'users', user.uid, 'projects', projectId);
+  await deleteDoc(docRef);
+}
 
-// Create a new project in Firestore
-export async function addProject(projectData: Omit<Project, 'slug' | 'id' | 'createdAt' | 'likes' | 'isDeleted' | 'deletedAt'>): Promise<Project> {
-  let slug = slugify(projectData.title);
-  
-  // Ensure slug is unique
-  const q = query(collection(db, 'projects'), where('slug', '==', slug));
-  const querySnapshot = await getDocs(q);
-  if (!querySnapshot.empty) {
-    slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+// Update a project
+export async function updateProject(projectId: string, data: any) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+  const docRef = doc(db, 'users', user.uid, 'projects', projectId);
+  await updateDoc(docRef, data);
+}
+
+// ---------- Likes (shared projects liked globally) ----------
+
+// Toggle like/unlike for a project by a unique user or guest
+export async function toggleLikeProject(projectId: string) {
+  let uid = auth.currentUser?.uid;
+
+  // Fallback to anonymous session
+  if (!uid) {
+    uid = localStorage.getItem('sessionId') || uuidv4();
+    localStorage.setItem('sessionId', uid);
   }
 
-  const newProjectData: Omit<Project, 'id'> = {
-    ...projectData,
-    slug,
-    createdAt: serverTimestamp(),
-    likes: 0,
-    isDeleted: false,
-    deletedAt: null,
-  };
+  const likeRef = doc(db, 'projects', projectId, 'likes', uid);
+  const likeSnap = await getDoc(likeRef);
 
-  const docRef = await addDoc(collection(db, 'projects'), newProjectData);
-  
-  return {
-    ...newProjectData,
-    id: docRef.id,
-    createdAt: new Date().toISOString(),
-  } as Project;
-}
-
-// Fetch all non-deleted projects from Firestore
-export async function getProjects(): Promise<Project[]> {
-  const projectsCol = collection(db, 'projects');
-  const q = query(projectsCol, where('isDeleted', '==', false), orderBy('createdAt', 'desc'));
-  const projectSnapshot = await getDocs(q);
-  const projectList = projectSnapshot.docs.map(toSerializableProject);
-  return projectList;
-}
-
-// Fetch all soft-deleted projects (in the bin)
-export async function getBinnedProjects(): Promise<Project[]> {
-    const projectsCol = collection(db, 'projects');
-    const q = query(projectsCol, where('isDeleted', '==', true), orderBy('deletedAt', 'desc'));
-    const projectSnapshot = await getDocs(q);
-    const projectList = projectSnapshot.docs.map(toSerializableProject);
-    return projectList;
-}
-
-// Fetch a single project by its slug
-export async function getProjectBySlug(slug: string): Promise<Project | undefined> {
-  const q = query(collection(db, 'projects'), where('slug', '==', slug));
-  const querySnapshot = await getDocs(q);
-  if (querySnapshot.empty) {
-    return undefined;
+  if (likeSnap.exists()) {
+    await deleteDoc(likeRef); // Unlike
+  } else {
+    await setDoc(likeRef, { likedAt: new Date() }); // Like
   }
-  const docRef = querySnapshot.docs[0];
-  return toSerializableProject(docRef);
 }
 
-// Fetch a single project by its ID
-export async function getProjectById(id: string): Promise<Project | undefined> {
-    const projectDoc = doc(db, 'projects', id);
-    const docSnap = await getDoc(projectDoc);
-    if (!docSnap.exists()) {
-        return undefined;
-    }
-    return toSerializableProject(docSnap);
+// Get total likes for a project
+export async function getProjectLikeCount(projectId: string): Promise<number> {
+  const likesRef = collection(db, 'projects', projectId, 'likes');
+  const snapshot = await getDocs(likesRef);
+  return snapshot.size;
 }
 
-// Update an existing project in Firestore
-export async function updateProject(id: string, projectData: Partial<Omit<Project, 'id' | 'slug'>>): Promise<void> {
-  const projectDoc = doc(db, 'projects', id);
-  await updateDoc(projectDoc, projectData);
-}
-
-// Increment likes for a project
-export async function likeProject(id: string): Promise<void> {
-  const projectDoc = doc(db, 'projects', id);
-  await updateDoc(projectDoc, {
-    likes: increment(1),
+//Detection of Projects Existence for Runtime
+export async function softDeleteProject(userId: string, projectId: string) {
+  const projectRef = doc(db, 'users', userId, 'projects', projectId);
+  await updateDoc(projectRef, {
+    isDeleted: true,
+    deletedAt: new Date()
   });
-}
-
-// Soft delete a project (move to bin)
-export async function softDeleteProject(id: string): Promise<void> {
-    const projectDoc = doc(db, 'projects', id);
-    await updateDoc(projectDoc, {
-        isDeleted: true,
-        deletedAt: serverTimestamp(),
-    });
-}
-
-// Restore a project from the bin
-export async function restoreProject(id: string): Promise<void> {
-    const projectDoc = doc(db, 'projects', id);
-    await updateDoc(projectDoc, {
-        isDeleted: false,
-        deletedAt: null,
-    });
-}
-
-// Permanently delete a project from Firestore
-export async function deleteProject(id: string): Promise<void> {
-  const projectDoc = doc(db, 'projects', id);
-  await deleteDoc(projectDoc);
-}
-
-// Add contact form submission
-export async function addContactMessage(data: { email: string; name: string; message: string; }) {
-    await addDoc(collection(db, "contacts"), {
-        ...data,
-        submittedAt: serverTimestamp(),
-    });
 }
