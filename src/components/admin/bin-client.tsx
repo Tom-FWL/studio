@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Restore, Trash2, Hourglass, Info } from 'lucide-react';
+import { Undo2, Trash2, Hourglass, Info } from 'lucide-react';
 import { deleteProject, restoreProject } from '@/lib/project-service';
 import { formatDistanceToNow, differenceInDays } from 'date-fns';
 
@@ -108,7 +108,7 @@ export function BinClient({ projects }: { projects: Project[] }) {
                     onClick={() => handleAction(project.id, 'restore')}
                     disabled={loadingStates[project.id]}
                 >
-                  <Restore className="mr-2 h-4 w-4" /> Restore
+                  <Undo2 className="mr-2 h-4 w-4" /> Undo
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
